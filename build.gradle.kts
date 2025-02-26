@@ -10,6 +10,7 @@ group = "com.scr.project"
 version = "0.0.1-SNAPSHOT"
 private val jakartaValidationVersion = "3.0.2"
 private val mockkVersion = "1.12.0"
+private val commonsCinemaVersion = "1.0.0"
 
 java {
 	toolchain {
@@ -19,6 +20,7 @@ java {
 
 repositories {
 	mavenCentral()
+    maven("https://gitlab.com/api/v4/projects/67204824/packages/maven")
 }
 
 dependencies {
@@ -30,9 +32,14 @@ dependencies {
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("jakarta.validation:jakarta.validation-api:$jakartaValidationVersion")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-webflux")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("io.projectreactor:reactor-test")
+    testImplementation("org.testcontainers:testcontainers")
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:mongodb")
+    testImplementation("com.scr.project.commons.cinema.test:commons-cinema-test:$commonsCinemaVersion")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
