@@ -9,6 +9,7 @@ plugins {
 group = "com.scr.project"
 version = "0.0.1-SNAPSHOT"
 private val jakartaValidationVersion = "3.0.2"
+private val mockkVersion = "1.12.0"
 
 java {
 	toolchain {
@@ -26,9 +27,12 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("jakarta.validation:jakarta.validation-api:$jakartaValidationVersion")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("io.mockk:mockk:$mockkVersion")
+    testImplementation("io.projectreactor:reactor-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
