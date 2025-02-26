@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "springboot-app-movie.fullname" . }}
+spec:
+  rules:
+    - host: scr.g3.minikube
+      http:
+        paths:
+          - path: /api/movies
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "springboot-app-movie.fullname" . }}
+                port:
+                  number: 8080
