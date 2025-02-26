@@ -16,30 +16,62 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Getting-Started.gitlab-ci.yml
 
+image: gradle:jdk17-alpine
+
+services:
+  - name: docker:dind
+    alias: docker
+    command: [ "--tls=false" ]
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_HOST: unix:///var/run/docker.sock
+  TESTCONTAINERS_HOST_OVERRIDE: "host.docker.internal"
+  SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+  GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+  IMAGE_NAME: "service-actor-management"
+  REGISTRY: "registry.gitlab.com/cinema7590904"
+
 stages:          # List of stages for jobs, and their order of execution
   - build
   - test
   - deploy
 
-build-job:       # This job runs in the build stage, which runs first.
+build:
   stage: build
   script:
-    - echo "Compiling the code..."
-    - echo "Compile complete."
+    - gradle --build-cache assemble
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: push
+    paths:
+      - build
+      - .gradle
+  artifacts:
+    paths:
+      - build/libs/service-movie-management-0.0.1-SNAPSHOT.jar
+    expire_in: 1 day
 
-unit-test-job:   # This job runs in the test stage.
-  stage: test    # It only starts when the job in the build stage completes successfully.
-  script:
-    - echo "Running unit tests... This will take about 60 seconds."
-    - sleep 60
-    - echo "Code coverage is 90%"
-
-lint-test-job:   # This job also runs in the test stage.
-  stage: test    # It can run at the same time as unit-test-job (in parallel).
-  script:
-    - echo "Linting code... This will take about 10 seconds."
-    - sleep 10
-    - echo "No lint issues found."
+test:
+  stage: test
+  script: gradle check
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: pull
+    paths:
+      - build
+      - .gradle
+  dependencies:
+    - build
+  artifacts:
+    reports:
+      junit: build/test-results/test/**/TEST-*.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: build/reports/jacoco/test/jacocoTestReport.xml
+    paths:
+      - build/reports/jacoco/test/jacocoTestReport.xml
+  coverage: '/Total.*?([0-9,.]{1,5})%/'
 
 deploy-job:      # This job runs in the deploy stage.
   stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
