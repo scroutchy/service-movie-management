@@ -3,6 +3,7 @@ plugins {
 	kotlin("plugin.spring") version "1.9.25"
 	id("org.springframework.boot") version "3.4.3"
 	id("io.spring.dependency-management") version "1.1.7"
+    id("org.sonarqube") version "6.0.1.5171"
     id("jacoco")
 }
 
@@ -89,4 +90,11 @@ tasks.register("printCoverage") {
 tasks.withType<Test> {
 	useJUnitPlatform()
     finalizedBy("jacocoTestReport", tasks.named("printCoverage"))
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "cinema7590904_service-movie-management")
+        property("sonar.organization", "cinema7590904")
+    }
 }
