@@ -2,6 +2,7 @@ package com.scr.project.smm.domains.movie.component
 
 import com.scr.project.smm.AbstractIntegrationTest
 import com.scr.project.smm.domains.movie.dao.MovieDao
+import com.scr.project.smm.domains.movie.dao.pulpFiction
 import com.scr.project.smm.domains.movie.model.entity.Movie
 import com.scr.project.smm.domains.movie.model.entity.MovieType.Fantasy
 import com.scr.project.smm.domains.movie.repository.MovieRepository
@@ -40,4 +41,29 @@ internal class MovieRepositoryTest(
             }
             .verifyComplete()
     }
+
+    @Test
+    fun `findBy should return correct movie`() {
+        val movie = pulpFiction()
+        movieRepository.findById(movie.id!!.toHexString())
+            .test()
+            .expectSubscription()
+            .consumeNextWith {
+                assertThat(it.id).isEqualTo(movie.id)
+                assertThat(it.title).isEqualTo(movie.title)
+                assertThat(it.releaseDate).isEqualTo(movie.releaseDate)
+                assertThat(it.type).isEqualTo(movie.type)
+            }
+            .verifyComplete()
+    }
+
+    @Test
+    fun `findById should return null when id not in database`() {
+        movieRepository.findById("dummyId")
+            .test()
+            .expectSubscription()
+            .expectNextCount(0)
+            .verifyComplete()
+    }
+
 }

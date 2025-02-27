@@ -2,9 +2,12 @@ package com.scr.project.smm.entrypoint.integration.resource
 
 import com.scr.project.smm.AbstractIntegrationTest
 import com.scr.project.smm.domains.movie.dao.MovieDao
+import com.scr.project.smm.domains.movie.error.MovieExceptionHandler.ErrorResponse
 import com.scr.project.smm.domains.movie.model.entity.MovieType.Comedy
 import com.scr.project.smm.domains.movie.model.entity.MovieType.Drama
+import com.scr.project.smm.entrypoint.mapper.toApiDto
 import com.scr.project.smm.entrypoint.model.api.MovieApiDto
+import com.scr.project.smm.entrypoint.resource.ApiConstants.ID_PATH
 import com.scr.project.smm.entrypoint.resource.ApiConstants.MOVIE_PATH
 import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
@@ -89,5 +92,36 @@ internal class MovieResourceIntegrationTest(
             .exchange()
             .expectStatus().isEqualTo(CONFLICT)
         assertThat(movieDao.count()).isEqualTo(initialCount)
+    }
+
+    @Test
+    fun `find should succeed and returns a movie response when id exists`() {
+        val movieResponse = movieDao.findAny()!!.toApiDto()
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .get()
+            .uri("$MOVIE_PATH$ID_PATH", movieResponse.id)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(MovieApiDto::class.java)
+            .consumeWith {
+                val body = it.responseBody
+                assertThat(body).isNotNull
+                with(body!!) {
+                    assertThat(id).isEqualTo(movieResponse.id)
+                    assertThat(title).isEqualTo(movieResponse.title)
+                    assertThat(releaseDate).isEqualTo(movieResponse.releaseDate)
+                    assertThat(type).isEqualTo(movieResponse.type)
+                }
+            }
+    }
+
+    @Test
+    fun `find should return 404 when id does not exist`() {
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .get()
+            .uri("$MOVIE_PATH$ID_PATH", ObjectId.get().toHexString())
+            .exchange()
+            .expectStatus().isNotFound
+            .expectBody(ErrorResponse::class.java)
     }
 }
