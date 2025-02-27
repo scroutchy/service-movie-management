@@ -12,6 +12,9 @@ version = "0.0.1-SNAPSHOT"
 private val jakartaValidationVersion = "3.0.2"
 private val mockkVersion = "1.12.0"
 private val commonsCinemaVersion = "1.0.0"
+private val retrofitVersion = "2.9.0"
+private val converterJacksonVersion = "2.11.0"
+private val reactorAdapterVersion = "2.1.0"
 
 java {
 	toolchain {
@@ -24,18 +27,29 @@ repositories {
     maven("https://gitlab.com/api/v4/projects/67204824/packages/maven")
 }
 
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:2024.0.0")
+    }
+}
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("jakarta.validation:jakarta.validation-api:$jakartaValidationVersion")
     implementation("com.scr.project.commons.cinema:commons-cinema:$commonsCinemaVersion")
+    implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
+    implementation("com.squareup.retrofit2:converter-jackson:$converterJacksonVersion")
+    implementation("com.jakewharton.retrofit:retrofit2-reactor-adapter:$reactorAdapterVersion")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.boot:spring-boot-starter-webflux")
+//    testImplementation("org.springframework.boot:spring-boot-starter-webflux")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("io.projectreactor:reactor-test")
@@ -43,6 +57,7 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:mongodb")
     testImplementation("com.scr.project.commons.cinema.test:commons-cinema-test:$commonsCinemaVersion")
+    testImplementation("org.springframework.cloud:spring-cloud-contract-wiremock")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

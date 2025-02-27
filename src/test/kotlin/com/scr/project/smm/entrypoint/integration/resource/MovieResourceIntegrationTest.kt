@@ -96,7 +96,7 @@ internal class MovieResourceIntegrationTest(
 
     @Test
     fun `find should succeed and returns a movie response when id exists`() {
-        val movieResponse = movieDao.findAny()!!.toApiDto()
+        val movieResponse = movieDao.findAnyBy { it.actors.isEmpty() }!!.toApiDto()
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .get()
             .uri("$MOVIE_PATH$ID_PATH", movieResponse.id)
@@ -111,7 +111,34 @@ internal class MovieResourceIntegrationTest(
                     assertThat(title).isEqualTo(movieResponse.title)
                     assertThat(releaseDate).isEqualTo(movieResponse.releaseDate)
                     assertThat(type).isEqualTo(movieResponse.type)
-                    assertThat(actors).isEqualTo(movieResponse.actors)
+                    assertThat(actorIds).isEqualTo(movieResponse.actorIds)
+                }
+            }
+    }
+
+    @Test
+    fun `find should succeed and returns a movie response when id exists and list of actors is not empty`() {
+        val movieResponse = movieDao.findAnyBy { it.actors.isNotEmpty() }!!.toApiDto()
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .get()
+            .uri("$MOVIE_PATH$ID_PATH", movieResponse.id)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(MovieApiDto::class.java)
+            .consumeWith {
+                val body = it.responseBody
+                assertThat(body).isNotNull
+                with(body!!) {
+                    assertThat(id).isEqualTo(movieResponse.id)
+                    assertThat(title).isEqualTo(movieResponse.title)
+                    assertThat(releaseDate).isEqualTo(movieResponse.releaseDate)
+                    assertThat(type).isEqualTo(movieResponse.type)
+                    assertThat(actorIds).isEmpty()
+                    assertThat(actors).hasSize(movieResponse.actorIds.size)
+                    actors.forEach { a ->
+                        assertThat(a.id).isIn(movieResponse.actorIds)
+                        assertThat(a.fullName).isEqualTo("Lambert Wilson")
+                    }
                 }
             }
     }

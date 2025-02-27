@@ -1,0 +1,24 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/api/actors/.*"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "surname": "Wilson",
+      "name": "Lambert",
+      "nationalityCode": "FR",
+      "birthDate": "1958-08-03",
+      "deathDate": null,
+      "id": "{{request.pathSegments.[2]}}",
+      "alive": true
+    },
+    "transformers": [
+      "response-template"
+    ]
+  }
+}

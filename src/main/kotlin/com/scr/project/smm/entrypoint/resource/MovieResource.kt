@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping(MOVIE_PATH)
-class MovieResource(val movieService: MovieService) {
+class MovieResource(private val movieService: MovieService) {
 
     private val logger: Logger = LoggerFactory.getLogger(MovieResource::class.java)
 
