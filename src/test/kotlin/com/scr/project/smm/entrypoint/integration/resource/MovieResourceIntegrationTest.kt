@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.http.HttpStatus.CONFLICT
 import org.springframework.test.web.reactive.server.WebTestClient
 import java.time.LocalDate
 
@@ -59,5 +60,32 @@ internal class MovieResourceIntegrationTest(
                     assertThat(type).isEqualTo(body.type)
                 }
             }
+    }
+
+    @Test
+    fun `create should fail when release date is in future`() {
+        val movieRequest = MovieApiDto("The Mask", LocalDate.now().plusDays(10), "Comedy")
+        val initialCount = movieDao.count()
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .post()
+            .uri(MOVIE_PATH)
+            .bodyValue(movieRequest)
+            .exchange()
+            .expectStatus().isBadRequest
+            .expectBody(Exception::class.java)
+        assertThat(movieDao.count()).isEqualTo(initialCount)
+    }
+
+    @Test
+    fun `create should fail when the title of the movie already exists in database`() {
+        val movieRequest = MovieApiDto("Pulp Fiction", LocalDate.of(1994, 10, 14), "Theatrical")
+        val initialCount = movieDao.count()
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .post()
+            .uri(MOVIE_PATH)
+            .bodyValue(movieRequest)
+            .exchange()
+            .expectStatus().isEqualTo(CONFLICT)
+        assertThat(movieDao.count()).isEqualTo(initialCount)
     }
 }
