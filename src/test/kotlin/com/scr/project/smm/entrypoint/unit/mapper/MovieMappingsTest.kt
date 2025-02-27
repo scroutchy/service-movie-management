@@ -15,22 +15,33 @@ class MovieMappingsTest {
 
     @Test
     fun `toEntity should succeed`() {
-        val movieApiDto = MovieApiDto("title", LocalDate.now(), Thriller)
+        val movieApiDto =
+            MovieApiDto("title", LocalDate.now(), Thriller, listOf(ObjectId.get().toHexString(), ObjectId.get().toHexString()))
         val movie = movieApiDto.toEntity()
         assertThat(movie).isNotNull
         assertThat(movie.title).isEqualTo(movieApiDto.title)
         assertThat(movie.releaseDate).isEqualTo(movieApiDto.releaseDate)
         assertThat(movie.type).isEqualTo(movieApiDto.type)
+        assertThat(movie.actors).hasSize(movieApiDto.actors.size)
+        movie.actors.forEach { movieApiDto.actors.contains(it) }
     }
 
     @Test
     fun `toApiDto should succeed`() {
-        val movie = Movie("title", LocalDate.now(), ScienceFiction, ObjectId.get())
+        val movie = Movie(
+            "title",
+            LocalDate.now(),
+            ScienceFiction,
+            listOf(ObjectId.get().toHexString(), ObjectId.get().toHexString()),
+            ObjectId.get()
+        )
         val movieApiDto = movie.toApiDto()
         assertThat(movieApiDto).isNotNull
         assertThat(movieApiDto.title).isEqualTo(movie.title)
         assertThat(movieApiDto.releaseDate).isEqualTo(movie.releaseDate)
         assertThat(movieApiDto.type).isEqualTo(movie.type)
+        assertThat(movieApiDto.actors).hasSize(movie.actors.size)
+        movieApiDto.actors.forEach { movie.actors.contains(it) }
         assertThat(movieApiDto.id).isEqualTo(movie.id?.toHexString())
     }
 }

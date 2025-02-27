@@ -33,6 +33,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("jakarta.validation:jakarta.validation-api:$jakartaValidationVersion")
+    implementation("com.scr.project.commons.cinema:commons-cinema:$commonsCinemaVersion")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webflux")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
