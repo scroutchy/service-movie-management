@@ -11,5 +11,6 @@ data class Movie(
     val title: String,
     val releaseDate: LocalDate,
     val type: MovieType,
+    val actors: List<String> = listOf(),
     @field:Id @BsonId var id: ObjectId? = null,
 )

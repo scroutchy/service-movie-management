@@ -11,5 +11,6 @@ data class MovieApiDto(
     @field:PastOrPresent
     val releaseDate: LocalDate,
     val type: MovieType,
+    val actors: List<String> = listOf(),
     var id: String? = null
 )

@@ -9,5 +9,6 @@ fun pulpFiction() = Movie(
     "Pulp Fiction",
     LocalDate.of(1994, 10, 14),
     Comedy,
+    listOf("67c09246c908c7ee39bc5e89", "67c09246c908c7ee39bc5e90"),
     ObjectId("67c09246c908c7ee39bc5e88")
 )

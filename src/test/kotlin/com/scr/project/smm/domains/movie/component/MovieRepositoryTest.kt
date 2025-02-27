@@ -53,6 +53,7 @@ internal class MovieRepositoryTest(
                 assertThat(it.title).isEqualTo(movie.title)
                 assertThat(it.releaseDate).isEqualTo(movie.releaseDate)
                 assertThat(it.type).isEqualTo(movie.type)
+                assertThat(it.actors).isEqualTo(movie.actors)
             }
             .verifyComplete()
     }

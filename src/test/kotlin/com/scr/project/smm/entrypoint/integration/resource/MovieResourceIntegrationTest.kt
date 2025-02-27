@@ -111,6 +111,7 @@ internal class MovieResourceIntegrationTest(
                     assertThat(title).isEqualTo(movieResponse.title)
                     assertThat(releaseDate).isEqualTo(movieResponse.releaseDate)
                     assertThat(type).isEqualTo(movieResponse.type)
+                    assertThat(actors).isEqualTo(movieResponse.actors)
                 }
             }
     }
