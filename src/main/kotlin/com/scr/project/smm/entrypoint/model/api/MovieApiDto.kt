@@ -1,5 +1,6 @@
 package com.scr.project.smm.entrypoint.model.api
 
+import com.scr.project.smm.domains.movie.model.entity.MovieType
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.PastOrPresent
 import java.time.LocalDate
@@ -9,6 +10,6 @@ data class MovieApiDto(
     val title: String,
     @field:PastOrPresent
     val releaseDate: LocalDate,
-    val type: String,
+    val type: MovieType,
     var id: String? = null
 )

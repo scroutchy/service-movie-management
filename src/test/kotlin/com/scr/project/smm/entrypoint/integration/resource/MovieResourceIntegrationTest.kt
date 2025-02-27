@@ -2,6 +2,8 @@ package com.scr.project.smm.entrypoint.integration.resource
 
 import com.scr.project.smm.AbstractIntegrationTest
 import com.scr.project.smm.domains.movie.dao.MovieDao
+import com.scr.project.smm.domains.movie.model.entity.MovieType.Comedy
+import com.scr.project.smm.domains.movie.model.entity.MovieType.Drama
 import com.scr.project.smm.entrypoint.model.api.MovieApiDto
 import com.scr.project.smm.entrypoint.resource.ApiConstants.MOVIE_PATH
 import org.assertj.core.api.Assertions.assertThat
@@ -34,7 +36,7 @@ internal class MovieResourceIntegrationTest(
 
     @Test
     fun `create should succeed and create a movie in database`() {
-        val movieRequest = MovieApiDto("The Mask", LocalDate.of(1994, 7, 29), "Comedy")
+        val movieRequest = MovieApiDto("The Mask", LocalDate.of(1994, 7, 29), Comedy)
         val initialCount = movieDao.count()
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .post()
@@ -64,7 +66,7 @@ internal class MovieResourceIntegrationTest(
 
     @Test
     fun `create should fail when release date is in future`() {
-        val movieRequest = MovieApiDto("The Mask", LocalDate.now().plusDays(10), "Comedy")
+        val movieRequest = MovieApiDto("The Mask", LocalDate.now().plusDays(10), Comedy)
         val initialCount = movieDao.count()
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .post()
@@ -78,7 +80,7 @@ internal class MovieResourceIntegrationTest(
 
     @Test
     fun `create should fail when the title of the movie already exists in database`() {
-        val movieRequest = MovieApiDto("Pulp Fiction", LocalDate.of(1994, 10, 14), "Theatrical")
+        val movieRequest = MovieApiDto("Pulp Fiction", LocalDate.of(1994, 10, 14), Drama)
         val initialCount = movieDao.count()
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .post()

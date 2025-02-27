@@ -10,6 +10,6 @@ import java.time.LocalDate
 data class Movie(
     val title: String,
     val releaseDate: LocalDate,
-    val type: String,
+    val type: MovieType,
     @field:Id @BsonId var id: ObjectId? = null,
 )

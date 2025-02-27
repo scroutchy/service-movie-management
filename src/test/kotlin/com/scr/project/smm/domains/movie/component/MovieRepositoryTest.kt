@@ -3,6 +3,7 @@ package com.scr.project.smm.domains.movie.component
 import com.scr.project.smm.AbstractIntegrationTest
 import com.scr.project.smm.domains.movie.dao.MovieDao
 import com.scr.project.smm.domains.movie.model.entity.Movie
+import com.scr.project.smm.domains.movie.model.entity.MovieType.Fantasy
 import com.scr.project.smm.domains.movie.repository.MovieRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -25,7 +26,7 @@ internal class MovieRepositoryTest(
 
     @Test
     fun `insert should succeed`() {
-        val movie = Movie("The Fellowship of the Ring", LocalDate.of(2001, 12, 19), "Fantasy")
+        val movie = Movie("The Fellowship of the Ring", LocalDate.of(2001, 12, 19), Fantasy)
         val initialCount = movieDao.count()
         movieRepository.insert(movie)
             .test()

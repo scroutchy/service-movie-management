@@ -1,6 +1,7 @@
 package com.scr.project.smm.domains.movie.service
 
 import com.scr.project.smm.domains.movie.model.entity.Movie
+import com.scr.project.smm.domains.movie.model.entity.MovieType.Fantasy
 import com.scr.project.smm.domains.movie.repository.MovieRepository
 import io.mockk.clearMocks
 import io.mockk.confirmVerified
@@ -17,7 +18,7 @@ import java.time.LocalDate
 
 class MovieServiceTest {
 
-    private val movieWithoutId = Movie("title", LocalDate.now(), "type")
+    private val movieWithoutId = Movie("title", LocalDate.now(), Fantasy)
     private val movieRepository = mockk<MovieRepository>()
     private val movieService = MovieService(movieRepository)
 

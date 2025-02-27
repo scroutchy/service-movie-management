@@ -1,6 +1,8 @@
 package com.scr.project.smm.entrypoint.unit.mapper
 
 import com.scr.project.smm.domains.movie.model.entity.Movie
+import com.scr.project.smm.domains.movie.model.entity.MovieType.ScienceFiction
+import com.scr.project.smm.domains.movie.model.entity.MovieType.Thriller
 import com.scr.project.smm.entrypoint.mapper.toApiDto
 import com.scr.project.smm.entrypoint.mapper.toEntity
 import com.scr.project.smm.entrypoint.model.api.MovieApiDto
@@ -13,7 +15,7 @@ class MovieMappingsTest {
 
     @Test
     fun `toEntity should succeed`() {
-        val movieApiDto = MovieApiDto("title", LocalDate.now(), "type")
+        val movieApiDto = MovieApiDto("title", LocalDate.now(), Thriller)
         val movie = movieApiDto.toEntity()
         assertThat(movie).isNotNull
         assertThat(movie.title).isEqualTo(movieApiDto.title)
@@ -23,7 +25,7 @@ class MovieMappingsTest {
 
     @Test
     fun `toApiDto should succeed`() {
-        val movie = Movie("title", LocalDate.now(), "type", ObjectId.get())
+        val movie = Movie("title", LocalDate.now(), ScienceFiction, ObjectId.get())
         val movieApiDto = movie.toApiDto()
         assertThat(movieApiDto).isNotNull
         assertThat(movieApiDto.title).isEqualTo(movie.title)

@@ -1,6 +1,7 @@
 package com.scr.project.smm.entrypoint.unit.resource
 
 import com.scr.project.smm.domains.movie.model.entity.Movie
+import com.scr.project.smm.domains.movie.model.entity.MovieType.Western
 import com.scr.project.smm.domains.movie.service.MovieService
 import com.scr.project.smm.entrypoint.mapper.toEntity
 import com.scr.project.smm.entrypoint.model.api.MovieApiDto
@@ -18,7 +19,7 @@ import java.time.LocalDate
 
 class MovieResourceTest {
 
-    private val movieRequest = MovieApiDto("title", LocalDate.now(), "type")
+    private val movieRequest = MovieApiDto("title", LocalDate.now(), Western)
     private val movieService = mockk<MovieService>()
     private val movieResource = MovieResource(movieService)
 
