@@ -1,6 +1,7 @@
 package com.scr.project.smm.domains.movie.service
 
 import com.scr.project.smm.domains.movie.error.MovieErrors.OnMovieNotFound
+import com.scr.project.smm.domains.movie.model.business.Actor
 import com.scr.project.smm.domains.movie.model.entity.Movie
 import com.scr.project.smm.domains.movie.model.entity.MovieType.Fantasy
 import com.scr.project.smm.domains.movie.repository.MovieRepository
@@ -24,7 +25,8 @@ class MovieServiceTest {
     private val movieWithoutId = Movie("title", LocalDate.now(), Fantasy)
     private val movie = movieWithoutId.copy(id = ObjectId.get())
     private val movieRepository = mockk<MovieRepository>()
-    private val movieService = MovieService(movieRepository)
+    private val actorService = mockk<ActorService>()
+    private val movieService = MovieService(movieRepository, actorService)
 
     @BeforeEach
     internal fun setUp() {
@@ -54,13 +56,35 @@ class MovieServiceTest {
             .test()
             .expectSubscription()
             .consumeNextWith {
-                assertThat(it.id).isEqualTo(movie.id)
-                assertThat(it.releaseDate).isEqualTo(movie.releaseDate)
-                assertThat(it.title).isEqualTo(movie.title)
-                assertThat(it.type).isEqualTo(movie.type)
+                assertThat(it.movie.id).isEqualTo(movie.id)
+                assertThat(it.movie.releaseDate).isEqualTo(movie.releaseDate)
+                assertThat(it.movie.title).isEqualTo(movie.title)
+                assertThat(it.movie.type).isEqualTo(movie.type)
+                assertThat(it.actors).isEmpty()
             }.verifyComplete()
         verify(exactly = 1) { movieRepository.findById(movie.id!!.toHexString()) }
         confirmVerified(movieRepository)
+    }
+
+    @Test
+    fun `findById should succeed and retrieve actors when provided in movie`() {
+        val actorId = ObjectId.get().toHexString()
+        every { movieRepository.findById(movie.id!!.toHexString()) } answers { movie.copy(actors = listOf(actorId)).toMono() }
+        every { actorService.findById(actorId) } answers { Actor(actorId, "Brad Pitt").toMono() }
+        movieService.findById(movie.id!!)
+            .test()
+            .expectSubscription()
+            .consumeNextWith {
+                assertThat(it.movie.id).isEqualTo(movie.id)
+                assertThat(it.movie.releaseDate).isEqualTo(movie.releaseDate)
+                assertThat(it.movie.title).isEqualTo(movie.title)
+                assertThat(it.movie.type).isEqualTo(movie.type)
+                assertThat(it.actors).hasSize(1)
+                assertThat(it.actors.single()).isEqualTo(Actor(actorId, "Brad Pitt"))
+            }.verifyComplete()
+        verify(exactly = 1) { movieRepository.findById(movie.id!!.toHexString()) }
+        verify(exactly = 1) { actorService.findById(any()) }
+        confirmVerified(movieRepository, actorService)
     }
 
     @Test

@@ -1,7 +1,9 @@
 package com.scr.project.smm.domains.movie.error
 
 import com.mongodb.ErrorCategory.DUPLICATE_KEY
+import com.scr.project.smm.domains.movie.error.MovieErrorReasonCode.ACTOR_NOT_FOUND
 import com.scr.project.smm.domains.movie.error.MovieErrorReasonCode.MOVIE_NOT_FOUND
+import com.scr.project.smm.domains.movie.error.MovieErrors.OnActorNotFound
 import com.scr.project.smm.domains.movie.error.MovieErrors.OnMovieNotFound
 import com.scr.project.smm.domains.movie.error.MovieExceptionHandler.ErrorResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -34,4 +36,15 @@ class MovieExceptionHandlerTest {
         assertThat(response.body?.errorReason).isEqualTo("Already existing key")
         assertThat(response.body?.message).isEqualTo("The input request defines a movie that already exists.")
     }
+
+    @Test
+    fun `handle OnActorNotFoundException returns correct response`() {
+        val objectId = ObjectId.get().toHexString()
+        val response: ResponseEntity<ErrorResponse> = handler.handleOnActorNotFound(OnActorNotFound(objectId))
+        assertThat(response.statusCode).isEqualTo(NOT_FOUND)
+        assertThat(response.body?.errorCode).isEqualTo(ACTOR_NOT_FOUND.name)
+        assertThat(response.body?.errorReason).isEqualTo(ACTOR_NOT_FOUND.wording)
+        assertThat(response.body?.message).isEqualTo("The actor with id $objectId was not found in Actor component.")
+    }
+
 }

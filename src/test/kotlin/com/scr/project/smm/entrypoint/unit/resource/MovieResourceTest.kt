@@ -1,10 +1,13 @@
 package com.scr.project.smm.entrypoint.unit.resource
 
 import com.scr.project.smm.domains.movie.error.MovieErrors.OnMovieNotFound
+import com.scr.project.smm.domains.movie.model.business.Actor
 import com.scr.project.smm.domains.movie.model.entity.Movie
 import com.scr.project.smm.domains.movie.model.entity.MovieType.Western
+import com.scr.project.smm.domains.movie.ports.MovieWithActors
 import com.scr.project.smm.domains.movie.service.MovieService
 import com.scr.project.smm.entrypoint.mapper.toEntity
+import com.scr.project.smm.entrypoint.model.api.ActorApiDto
 import com.scr.project.smm.entrypoint.model.api.MovieApiDto
 import com.scr.project.smm.entrypoint.resource.MovieResource
 import io.mockk.clearMocks
@@ -31,7 +34,6 @@ class MovieResourceTest {
     internal fun setUp() {
         clearMocks(movieService)
         every { movieService.create(any<Movie>()) } answers { movieRequest.toEntity().copy(id = ObjectId()).toMono() }
-        every { movieService.findById(any<ObjectId>()) } answers { movieRequest.toEntity().copy(id = firstArg()).toMono() }
     }
 
     @Test
@@ -52,6 +54,9 @@ class MovieResourceTest {
     @Test
     fun `find should succeed and return a movie response when id exits`() {
         val id = ObjectId.get()
+        every { movieService.findById(any<ObjectId>()) } answers {
+            MovieWithActors(movieRequest.toEntity().copy(id = firstArg()), listOf()).toMono()
+        }
         movieResource.find(id)
             .test()
             .expectSubscription()
@@ -61,6 +66,8 @@ class MovieResourceTest {
                 assertThat(it.title).isEqualTo(movieRequest.title)
                 assertThat(it.releaseDate).isEqualTo(movieRequest.releaseDate)
                 assertThat(it.type).isEqualTo(movieRequest.type)
+                assertThat(it.actorIds).isEmpty()
+                assertThat(it.actors).isEmpty()
             }
             .verifyComplete()
         verify(exactly = 1) { movieService.findById(id) }
@@ -68,7 +75,31 @@ class MovieResourceTest {
     }
 
     @Test
-    fun `find should return an exception when movie id is not exist`() {
+    fun `find should succeed and return a movie response with actors when provided`() {
+        val id = ObjectId.get()
+        val actorId = ObjectId.get().toHexString()
+        every { movieService.findById(any<ObjectId>()) } answers {
+            MovieWithActors(movieRequest.toEntity().copy(id = firstArg()), listOf(Actor(actorId, "Brad Pitt"))).toMono()
+        }
+        movieResource.find(id)
+            .test()
+            .expectSubscription()
+            .consumeNextWith {
+                assertThat(it).isNotNull()
+                assertThat(it.id).isEqualTo(id.toHexString())
+                assertThat(it.title).isEqualTo(movieRequest.title)
+                assertThat(it.releaseDate).isEqualTo(movieRequest.releaseDate)
+                assertThat(it.type).isEqualTo(movieRequest.type)
+                assertThat(it.actorIds).isEmpty()
+                assertThat(it.actors).isEqualTo(listOf(ActorApiDto(actorId, "Brad Pitt")))
+            }
+            .verifyComplete()
+        verify(exactly = 1) { movieService.findById(id) }
+        confirmVerified(movieService)
+    }
+
+    @Test
+    fun `find should return an exception when movie id does not exist`() {
         val id = ObjectId.get()
         every { movieService.findById(id) } answers { OnMovieNotFound(id).toMono() }
         movieResource.find(id)
