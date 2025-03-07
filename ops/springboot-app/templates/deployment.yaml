@@ -23,12 +23,20 @@ spec:
             imagePullPolicy: {{ .Values.image.pullPolicy }}
             ports:
               - containerPort: {{ .Values.service.port }}
+            envFrom:
+              - configMapRef:
+                  name: service-movie-management-configmap
             env:
               - name: SPRING_DATA_MONGODB_URI
                 valueFrom:
                   secretKeyRef:
                     name: mongodb-secret-smm
                     key: mongodbUri
+              - name: MISTRAL_API_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: mistral-token-secret-smm
+                    key: mistralApiToken
             resources:
               requests:
                 ephemeral-storage: {{ .Values.resources.requests.ephemeralStorage }}

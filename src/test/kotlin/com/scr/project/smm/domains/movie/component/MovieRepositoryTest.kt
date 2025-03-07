@@ -27,7 +27,7 @@ internal class MovieRepositoryTest(
 
     @Test
     fun `insert should succeed`() {
-        val movie = Movie("The Fellowship of the Ring", LocalDate.of(2001, 12, 19), Fantasy)
+        val movie = Movie("The Fellowship of the Ring", LocalDate.of(2001, 12, 19), Fantasy, "This is the synopsis")
         val initialCount = movieDao.count()
         movieRepository.insert(movie)
             .test()
@@ -37,6 +37,7 @@ internal class MovieRepositoryTest(
                 assertThat(it.title).isEqualTo(movie.title)
                 assertThat(it.releaseDate).isEqualTo(movie.releaseDate)
                 assertThat(it.type).isEqualTo(movie.type)
+                assertThat(it.synopsis).isEqualTo(movie.synopsis)
                 assertThat(movieDao.count()).isEqualTo(initialCount + 1)
             }
             .verifyComplete()

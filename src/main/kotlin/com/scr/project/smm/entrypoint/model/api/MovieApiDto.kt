@@ -16,5 +16,6 @@ data class MovieApiDto(
     @JsonProperty(access = WRITE_ONLY)
     val actorIds: List<String> = listOf(),
     val actors: List<ActorApiDto> = listOf(),
+    val synopsis: String? = null,
     var id: String? = null
 )
