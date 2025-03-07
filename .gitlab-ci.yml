@@ -106,17 +106,35 @@ publish:
     paths:
       - build/libs/*.jar
 
-deploy:
+.deploy_base:
+  services: [ ]
   tags:
     - minikube
   stage: deploy
   when: manual
+  image: alpine:latest
   before_script:
     - apk update
     - apk add curl bash
-    - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-    - echo "$KUBECONFIG_CONTENT" > kubeconfig.yaml
+    - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | VERIFY_CHECKSUM=false bash
+    - echo "$KUBECONFIG_CLUSTER" > kubeconfig.yaml
     - export KUBECONFIG=$(pwd)/kubeconfig.yaml
   script:
     - helm version
-    - helm upgrade --install springboot-app-movie ./ops/springboot-app --set image.tag=${CI_COMMIT_REF_SLUG} --debug
+    - helm upgrade --install springboot-app-movie ./ops/springboot-app --set image.tag=${CI_COMMIT_REF_SLUG} -f ./ops/springboot-app/values.yaml -f "$CLUSTER_VALUES_FILE" --debug
+
+deploy_kind:
+  tags:
+    - k8s_docker
+  extends: .deploy_base
+  variables:
+    KUBECONFIG_CLUSTER: "$KUBECONFIG_CONTENT_K8SinDD"
+    CLUSTER_VALUES_FILE: "./ops/springboot-app/values-kind.yaml"
+
+deploy_minikube:
+  tags:
+    - minikube
+  extends: .deploy_base
+  variables:
+    KUBECONFIG_CLUSTER: "$KUBECONFIG_CONTENT"
+    CLUSTER_VALUES_FILE: "./ops/springboot-app/values-minikube.yaml"
