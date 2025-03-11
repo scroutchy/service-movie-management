@@ -4,3 +4,8 @@ spring:
 actor:
   service:
     url: http://actor-management-springboot-app.default.svc.cluster.local:8080/
+mistral:
+  service:
+    url: ${MISTRAL_SERVICE_URL}
+  api:
+    token: ${MISTRAL_API_TOKEN}

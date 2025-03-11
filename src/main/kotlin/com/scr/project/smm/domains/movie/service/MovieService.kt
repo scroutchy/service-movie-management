@@ -16,12 +16,18 @@ import reactor.kotlin.core.publisher.switchIfEmpty
 import reactor.kotlin.core.publisher.toFlux
 
 @Service
-class MovieService(private val movieRepository: MovieRepository, private val actorService: ActorService) : MoviePort {
+class MovieService(
+    private val movieRepository: MovieRepository,
+    private val actorService: ActorService,
+    private val synopsisService: SynopsisService
+) : MoviePort {
 
     private val logger: Logger = LoggerFactory.getLogger(MovieService::class.java)
 
     override fun create(movie: Movie): Mono<Movie> {
-        return movieRepository.insert(movie)
+        return synopsisService.requestSynopsis(movie.title)
+            .map { movie.copy(synopsis = it) }
+            .flatMap(movieRepository::insert)
             .doOnSubscribe { logger.debug("Creating movie") }
             .doOnSuccess { logger.info("Creation of movie with id ${it.id} was successful.") }
             .doOnError { logger.warn("Creation of movie failed.") }

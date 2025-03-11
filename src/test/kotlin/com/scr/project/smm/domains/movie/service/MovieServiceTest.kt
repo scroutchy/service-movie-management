@@ -22,20 +22,22 @@ import java.time.LocalDate
 
 class MovieServiceTest {
 
-    private val movieWithoutId = Movie("title", LocalDate.now(), Fantasy)
+    private val movieWithoutId = Movie("title", LocalDate.now(), Fantasy, "This is the synopsis")
     private val movie = movieWithoutId.copy(id = ObjectId.get())
     private val movieRepository = mockk<MovieRepository>()
     private val actorService = mockk<ActorService>()
-    private val movieService = MovieService(movieRepository, actorService)
+    private val synopsisService = mockk<SynopsisService>()
+    private val movieService = MovieService(movieRepository, actorService, synopsisService)
 
     @BeforeEach
     internal fun setUp() {
-        clearMocks(movieRepository)
-        every { movieRepository.insert(movieWithoutId) } answers { movieWithoutId.copy(id = ObjectId.get()).toMono() }
+        clearMocks(movieRepository, actorService, synopsisService)
     }
 
     @Test
     fun `create should succeed`() {
+        every { movieRepository.insert(any<Movie>()) } answers { firstArg<Movie>().copy(id = ObjectId.get()).toMono() }
+        every { synopsisService.requestSynopsis(any<String>()) } answers { "This is the AI-generated synopsis".toMono() }
         movieService.create(movieWithoutId)
             .test()
             .expectSubscription()
@@ -44,9 +46,11 @@ class MovieServiceTest {
                 assertThat(it.title).isEqualTo(movieWithoutId.title)
                 assertThat(it.releaseDate).isEqualTo(movieWithoutId.releaseDate)
                 assertThat(it.type).isEqualTo(movieWithoutId.type)
+                assertThat(it.synopsis).isEqualTo("This is the AI-generated synopsis")
             }.verifyComplete()
-        verify(exactly = 1) { movieRepository.insert(movieWithoutId) }
-        confirmVerified(movieRepository)
+        verify(exactly = 1) { movieRepository.insert(any<Movie>()) }
+        verify(exactly = 1) { synopsisService.requestSynopsis(movieWithoutId.title) }
+        confirmVerified(movieRepository, synopsisService)
     }
 
     @Test
@@ -60,6 +64,7 @@ class MovieServiceTest {
                 assertThat(it.movie.releaseDate).isEqualTo(movie.releaseDate)
                 assertThat(it.movie.title).isEqualTo(movie.title)
                 assertThat(it.movie.type).isEqualTo(movie.type)
+                assertThat(it.movie.synopsis).isEqualTo(movie.synopsis)
                 assertThat(it.actors).isEmpty()
             }.verifyComplete()
         verify(exactly = 1) { movieRepository.findById(movie.id!!.toHexString()) }
@@ -79,6 +84,7 @@ class MovieServiceTest {
                 assertThat(it.movie.releaseDate).isEqualTo(movie.releaseDate)
                 assertThat(it.movie.title).isEqualTo(movie.title)
                 assertThat(it.movie.type).isEqualTo(movie.type)
+                assertThat(it.movie.synopsis).isEqualTo(movie.synopsis)
                 assertThat(it.actors).hasSize(1)
                 assertThat(it.actors.single()).isEqualTo(Actor(actorId, "Brad Pitt"))
             }.verifyComplete()

@@ -5,3 +5,8 @@ spring:
 actor:
   service:
     url: http://localhost:${wiremock.server.port}
+mistral:
+  service:
+    url: http://localhost:${wiremock.server.port}
+  api:
+    token: dummy

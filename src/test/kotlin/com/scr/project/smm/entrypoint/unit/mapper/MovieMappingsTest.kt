@@ -22,6 +22,7 @@ class MovieMappingsTest {
         assertThat(movie.title).isEqualTo(movieApiDto.title)
         assertThat(movie.releaseDate).isEqualTo(movieApiDto.releaseDate)
         assertThat(movie.type).isEqualTo(movieApiDto.type)
+        assertThat(movie.synopsis).isBlank()
         assertThat(movie.actors).hasSize(movieApiDto.actorIds.size)
         movie.actors.forEach { movieApiDto.actorIds.contains(it) }
     }
@@ -32,6 +33,7 @@ class MovieMappingsTest {
             "title",
             LocalDate.now(),
             ScienceFiction,
+            "This is the synopsis",
             listOf(ObjectId.get().toHexString(), ObjectId.get().toHexString()),
             ObjectId.get()
         )
@@ -40,6 +42,7 @@ class MovieMappingsTest {
         assertThat(movieApiDto.title).isEqualTo(movie.title)
         assertThat(movieApiDto.releaseDate).isEqualTo(movie.releaseDate)
         assertThat(movieApiDto.type).isEqualTo(movie.type)
+        assertThat(movieApiDto.synopsis).isEqualTo(movie.synopsis)
         assertThat(movieApiDto.actorIds).hasSize(movie.actors.size)
         movieApiDto.actorIds.forEach { movie.actors.contains(it) }
         assertThat(movieApiDto.id).isEqualTo(movie.id?.toHexString())

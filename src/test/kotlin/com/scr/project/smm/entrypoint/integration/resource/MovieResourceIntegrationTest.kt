@@ -54,6 +54,7 @@ internal class MovieResourceIntegrationTest(
                     assertThat(title).isEqualTo(movieRequest.title)
                     assertThat(releaseDate).isEqualTo(movieRequest.releaseDate)
                     assertThat(type).isEqualTo(movieRequest.type)
+                    assertThat(synopsis).isEqualTo("\"The Dark Knight\" explores themes of chaos, morality, and the limits of heroism as Batman confronts the Joker, a nihilistic criminal who tests the ethical boundaries of Gotham City.")
                     assertThat(id).isNotNull
                 }
                 assertThat(movieDao.count()).isEqualTo(initialCount + 1)
