@@ -11,7 +11,7 @@ group = "com.scr.project"
 version = "0.0.1-SNAPSHOT"
 private val jakartaValidationVersion = "3.0.2"
 private val mockkVersion = "1.12.0"
-private val commonsCinemaVersion = "1.0.0"
+private val commonsCinemaVersion = "2.0.0"
 private val retrofitVersion = "2.11.0"
 private val converterJacksonVersion = "2.11.0"
 private val reactorAdapterVersion = "2.1.0"
@@ -37,7 +37,6 @@ dependencyManagement {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-validation")
