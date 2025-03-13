@@ -5,6 +5,9 @@ spring:
 actor:
   service:
     url: http://localhost:${wiremock.server.port}
+  api:
+    jwt:
+      secretKey: dummySecretKeyForTestingPurposeOnly
 mistral:
   service:
     url: http://localhost:${wiremock.server.port}

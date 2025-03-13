@@ -1,7 +1,12 @@
 {
   "request": {
     "method": "POST",
-    "urlPathPattern": "/chat/completions"
+    "urlPathPattern": "/chat/completions",
+    "headers": {
+      "Authorization": {
+        "matches": "Bearer .*"
+      }
+    }
   },
   "response": {
     "status": 200,

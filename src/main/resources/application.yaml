@@ -4,6 +4,9 @@ spring:
 actor:
   service:
     url: http://actor-management-springboot-app.default.svc.cluster.local:8080/
+  api:
+    jwt:
+      secretKey: ${JWT_SECRET_KEY}
 mistral:
   service:
     url: ${MISTRAL_SERVICE_URL}

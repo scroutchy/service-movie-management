@@ -37,6 +37,11 @@ spec:
                   secretKeyRef:
                     name: mistral-token-secret-smm
                     key: mistralApiToken
+              - name: JWT_SECRET_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: jwt-secret-key-sam
+                    key: jwtSecretKey
             resources:
               requests:
                 ephemeral-storage: {{ .Values.resources.requests.ephemeralStorage }}

@@ -16,6 +16,7 @@ private val retrofitVersion = "2.11.0"
 private val converterJacksonVersion = "2.11.0"
 private val reactorAdapterVersion = "2.1.0"
 private val loggingInterceptorVersion = "4.11.0"
+private val javaJwtVersion = "4.5.0"
 
 java {
 	toolchain {
@@ -48,6 +49,7 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:$loggingInterceptorVersion")
     implementation("com.jakewharton.retrofit:retrofit2-reactor-adapter:$reactorAdapterVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("com.auth0:java-jwt:$javaJwtVersion")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("io.mockk:mockk:$mockkVersion")

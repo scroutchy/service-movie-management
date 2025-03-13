@@ -13,12 +13,13 @@ import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
 
 @Configuration
-class ActorRetrofitConfig {
+class ActorRetrofitConfig(private val tokenInterceptor: ActorAuthInterceptor) {
 
     @Bean
     fun actorRetrofit(@Value("\${actor.service.url}") actorServiceUrl: String): Retrofit {
         val objectMapper = ObjectMapper().registerKotlinModule().configure(FAIL_ON_UNKNOWN_PROPERTIES, false)
         val client = OkHttpClient.Builder()
+            .addInterceptor(tokenInterceptor)
             .addNetworkInterceptor(LoggingInterceptor())
             .build()
 
