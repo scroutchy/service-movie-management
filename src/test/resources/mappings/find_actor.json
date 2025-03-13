@@ -1,7 +1,12 @@
 {
   "request": {
     "method": "GET",
-    "urlPathPattern": "/api/actors/.*"
+    "urlPathPattern": "/api/actors/.*",
+    "headers": {
+      "Authorization": {
+        "matches": "Bearer .*"
+      }
+    }
   },
   "response": {
     "status": 200,

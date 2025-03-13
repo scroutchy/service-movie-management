@@ -13,7 +13,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
 
 @Configuration
-class MistralRetrofitConfig(private val tokenInterceptor: AuthInterceptor) {
+class MistralRetrofitConfig(private val tokenInterceptor: MistralAuthInterceptor) {
 
     @Bean
     fun mistralRetrofit(@Value("\${mistral.service.url}") mistralServiceUrl: String): Retrofit {

@@ -11,11 +11,12 @@ group = "com.scr.project"
 version = "0.0.1-SNAPSHOT"
 private val jakartaValidationVersion = "3.0.2"
 private val mockkVersion = "1.12.0"
-private val commonsCinemaVersion = "1.0.0"
+private val commonsCinemaVersion = "2.0.0"
 private val retrofitVersion = "2.11.0"
 private val converterJacksonVersion = "2.11.0"
 private val reactorAdapterVersion = "2.1.0"
 private val loggingInterceptorVersion = "4.11.0"
+private val javaJwtVersion = "4.5.0"
 
 java {
 	toolchain {
@@ -37,7 +38,6 @@ dependencyManagement {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-validation")
@@ -49,6 +49,7 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:$loggingInterceptorVersion")
     implementation("com.jakewharton.retrofit:retrofit2-reactor-adapter:$reactorAdapterVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("com.auth0:java-jwt:$javaJwtVersion")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("io.mockk:mockk:$mockkVersion")
