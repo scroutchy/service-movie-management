@@ -6,4 +6,5 @@ object ApiConstants {
     const val ACTOR_PATH = "api/actors"
     const val ID_PATH = "/{id}"
     const val ID = "id"
+    const val DEFAULT_PAGE_SIZE = 10
 }

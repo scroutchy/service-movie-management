@@ -2,11 +2,14 @@ package com.scr.project.smm.entrypoint.integration.resource
 
 import com.scr.project.smm.AbstractIntegrationTest
 import com.scr.project.smm.domains.movie.dao.MovieDao
+import com.scr.project.smm.domains.movie.dao.pulpFiction
 import com.scr.project.smm.domains.movie.error.MovieExceptionHandler.ErrorResponse
+import com.scr.project.smm.domains.movie.model.entity.Movie
 import com.scr.project.smm.domains.movie.model.entity.MovieType.Comedy
 import com.scr.project.smm.domains.movie.model.entity.MovieType.Drama
 import com.scr.project.smm.entrypoint.mapper.toApiDto
 import com.scr.project.smm.entrypoint.model.api.MovieApiDto
+import com.scr.project.smm.entrypoint.resource.ApiConstants.DEFAULT_PAGE_SIZE
 import com.scr.project.smm.entrypoint.resource.ApiConstants.ID_PATH
 import com.scr.project.smm.entrypoint.resource.ApiConstants.MOVIE_PATH
 import org.assertj.core.api.Assertions.assertThat
@@ -18,8 +21,11 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.http.HttpHeaders.CONTENT_RANGE
 import org.springframework.http.HttpStatus.CONFLICT
+import org.springframework.http.HttpStatus.PARTIAL_CONTENT
 import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.test.web.reactive.server.WebTestClient.ListBodySpec
 import java.time.LocalDate
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -152,5 +158,103 @@ internal class MovieResourceIntegrationTest(
             .exchange()
             .expectStatus().isNotFound
             .expectBody(ErrorResponse::class.java)
+    }
+
+    @Test
+    fun `list should succeed and return all movies when no date is provided`() {
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .get()
+            .uri(MOVIE_PATH)
+            .exchange()
+            .expectStatus().isOk
+            .expectBodyList(MovieApiDto::class.java)
+            .consumeWith<ListBodySpec<MovieApiDto>> {
+                val headers = it.responseHeaders
+                assertThat(headers).isNotNull
+                assertThat(headers.get(CONTENT_RANGE)).isEqualTo(listOf("movies 0-1/2"))
+                val body = it.responseBody
+                assertThat(body).isNotNull
+                assertThat(body).hasSize(movieDao.count().toInt())
+                body!!.forEach { movieDto ->
+                    val movie = movieDao.findAnyBy { it.id!!.toHexString() == movieDto.id }
+                    assertThat(movie).isNotNull
+                    with(movie!!) {
+                        assertThat(movieDto.id).isEqualTo(id!!.toHexString())
+                        assertThat(movieDto.title).isEqualTo(title)
+                        assertThat(movieDto.releaseDate).isEqualTo(releaseDate)
+                        assertThat(movieDto.type).isEqualTo(type)
+                        assertThat(movieDto.synopsis).isNull()
+                        assertThat(movieDto.actors).isEmpty()
+                        assertThat(movieDto.actorIds).isEmpty()
+                    }
+                }
+            }
+    }
+
+    @Test
+    fun `list should succeed and return empty list when no movie matches the dates`() {
+        val startDate = LocalDate.now().minusYears(500)
+        val endDate = LocalDate.now().minusYears(400)
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .get()
+            .uri("$MOVIE_PATH?startDate=$startDate&&endDate=$endDate")
+            .exchange()
+            .expectStatus().isOk
+            .expectBodyList(MovieApiDto::class.java)
+            .consumeWith<ListBodySpec<MovieApiDto>> {
+                val headers = it.responseHeaders
+                assertThat(headers).isNotNull
+                assertThat(headers.get(CONTENT_RANGE)).isEqualTo(listOf("movies */0"))
+                val body = it.responseBody
+                assertThat(body).isNotNull
+                assertThat(body).isEmpty()
+            }
+    }
+
+    @Test
+    fun `list should return a subset of movies when total result size exceeds page size`() {
+        movieDao.deleteAll()
+        val movies = generateListOfMovies(15)
+        movieDao.insertAll(movies)
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .get()
+            .uri(MOVIE_PATH)
+            .exchange()
+            .expectStatus().isEqualTo(PARTIAL_CONTENT)
+            .expectBodyList(MovieApiDto::class.java)
+            .consumeWith<ListBodySpec<MovieApiDto>> {
+                val headers = it.responseHeaders
+                assertThat(headers).isNotNull
+                assertThat(headers.get(CONTENT_RANGE)).isEqualTo(listOf("movies 0-9/10"))
+                val body = it.responseBody
+                assertThat(body).isNotNull
+                assertThat(body).hasSize(DEFAULT_PAGE_SIZE)
+                body!!.forEach { movieDto ->
+                    val movie = movieDao.findAnyBy { it.id!!.toHexString() == movieDto.id }
+                    assertThat(movie).isNotNull
+                    with(movie!!) {
+                        assertThat(movieDto.id).isEqualTo(id!!.toHexString())
+                        assertThat(movieDto.title).isEqualTo(title)
+                        assertThat(movieDto.releaseDate).isEqualTo(releaseDate)
+                        assertThat(movieDto.type).isEqualTo(type)
+                        assertThat(movieDto.synopsis).isNull()
+                        assertThat(movieDto.actors).isEmpty()
+                        assertThat(movieDto.actorIds).isEmpty()
+                    }
+                }
+            }
+    }
+
+    private fun generateListOfMovies(size: Int): List<Movie> {
+        return List(size) {
+            pulpFiction().copy(id = ObjectId.get(), title = generateRandomString())
+        }
+    }
+
+    private fun generateRandomString(): String {
+        val allowedChars = ('A'..'Z') + ('a'..'z')
+        return (1..5)
+            .map { allowedChars.random() }
+            .joinToString("")
     }
 }
