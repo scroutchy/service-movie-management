@@ -3,6 +3,7 @@ package com.scr.project.smm.entrypoint.unit.resource
 import com.scr.project.smm.domains.movie.error.MovieErrors.OnMovieNotFound
 import com.scr.project.smm.domains.movie.model.business.Actor
 import com.scr.project.smm.domains.movie.model.entity.Movie
+import com.scr.project.smm.domains.movie.model.entity.MovieType.Fantasy
 import com.scr.project.smm.domains.movie.model.entity.MovieType.Western
 import com.scr.project.smm.domains.movie.ports.MovieWithActors
 import com.scr.project.smm.domains.movie.service.MovieService
@@ -19,6 +20,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.data.domain.Pageable
+import reactor.kotlin.core.publisher.toFlux
 import reactor.kotlin.core.publisher.toMono
 import reactor.kotlin.test.test
 import reactor.kotlin.test.verifyError
@@ -111,4 +114,77 @@ class MovieResourceTest {
             }
             .verifyError(OnMovieNotFound::class)
     }
+
+    @Test
+    fun `list should succeed and return a list of movies`() {
+        val movie1 = generateMovie("Movie 1")
+        val movie2 = generateMovie("Movie 2")
+        val movies = listOf(movie1, movie2)
+        every { movieService.findAllBetween(Pageable.ofSize(10)) } answers { movies.toFlux() }
+        movieResource.list(Pageable.ofSize(10))
+            .test()
+            .expectSubscription()
+            .consumeNextWith {
+                assertThat(it.body).hasSize(movies.size)
+            }
+            .verifyComplete()
+        verify(exactly = 1) { movieService.findAllBetween(Pageable.ofSize(10)) }
+        confirmVerified(movieService)
+    }
+
+    @Test
+    fun `list should succeed and return a sublist of movies when filtering by release date before`() {
+        val movie1 = generateMovie("Movie 1")
+        val movie2 = generateMovie("Movie 2").copy(releaseDate = LocalDate.now().minusDays(5))
+        val movies = listOf(movie1, movie2)
+        every { movieService.findAllBetween(Pageable.ofSize(10), null, LocalDate.now().minusDays(7)) } answers {
+            movies.filter { it.releaseDate <= LocalDate.now().minusDays(7) }.toFlux()
+        }
+        movieResource.list(Pageable.ofSize(10), null, LocalDate.now().minusDays(7))
+            .test()
+            .expectSubscription()
+            .consumeNextWith {
+                assertThat(it.body).hasSize(movies.filter { it.releaseDate <= LocalDate.now().minusDays(7) }.size)
+            }
+            .verifyComplete()
+        verify(exactly = 1) { movieService.findAllBetween(Pageable.ofSize(10), null, LocalDate.now().minusDays(7)) }
+        confirmVerified(movieService)
+    }
+
+    @Test
+    fun `list should succeed and return a sublist of movies when filtering by release date after`() {
+        val movie1 = generateMovie("Movie 1")
+        val movie2 = generateMovie("Movie 2").copy(releaseDate = LocalDate.now().minusDays(5))
+        val movies = listOf(movie1, movie2)
+        every { movieService.findAllBetween(Pageable.ofSize(10), LocalDate.now().minusDays(7)) } answers {
+            movies.filter { it.releaseDate >= LocalDate.now().minusDays(7) }.toFlux()
+        }
+        movieResource.list(Pageable.ofSize(10), LocalDate.now().minusDays(7))
+            .test()
+            .expectSubscription()
+            .consumeNextWith {
+                assertThat(it.body).hasSize(movies.filter { it.releaseDate >= LocalDate.now().minusDays(7) }.size)
+            }
+            .verifyComplete()
+        verify(exactly = 1) { movieService.findAllBetween(Pageable.ofSize(10), LocalDate.now().minusDays(7)) }
+        confirmVerified(movieService)
+    }
+
+    @Test
+    fun `list should succeed and return a empty list when both limit dates are provided and no movie matches`() {
+        every { movieService.findAllBetween(Pageable.ofSize(10), any(), any()) } answers {
+            emptyList<Movie>().toFlux()
+        }
+        movieResource.list(Pageable.ofSize(10), LocalDate.now().minusDays(3), LocalDate.now())
+            .test()
+            .expectSubscription()
+            .consumeNextWith {
+                assertThat(it.body).isEmpty()
+            }
+            .verifyComplete()
+        verify(exactly = 1) { movieService.findAllBetween(Pageable.ofSize(10), LocalDate.now().minusDays(3), LocalDate.now()) }
+        confirmVerified(movieService)
+    }
+
+    private fun generateMovie(title: String) = Movie(title, LocalDate.now().minusDays(10), Fantasy, "This is the synopsis of $title")
 }

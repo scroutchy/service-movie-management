@@ -1,8 +1,11 @@
 package com.scr.project.smm.domains.movie.repository
 
 import com.scr.project.smm.domains.movie.model.entity.Movie
-import org.springframework.data.mongodb.repository.ReactiveMongoRepository
-import org.springframework.stereotype.Repository
+import org.springframework.data.domain.Pageable
+import reactor.core.publisher.Flux
+import java.time.LocalDate
 
-@Repository
-interface MovieRepository : ReactiveMongoRepository<Movie, String>
+interface MovieRepository {
+
+    fun findAllMoviesBetweenDates(pageable: Pageable, startDate: LocalDate? = null, endDate: LocalDate? = null): Flux<Movie>
+}
