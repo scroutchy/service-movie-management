@@ -1,3 +1,5 @@
 package com.scr.project.smm.entrypoint.model.api.retrofit
 
-data class ActorClientApiDto(val id: String, val surname: String, val name: String)
+import com.scr.project.commons.cinema.model.api.DTO
+
+data class ActorClientApiDto(val id: String, val surname: String, val name: String) : DTO
