@@ -3,6 +3,7 @@ package com.scr.project.smm.entrypoint.model.api
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY
 import com.fasterxml.jackson.annotation.JsonView
+import com.scr.project.commons.cinema.model.api.DTO
 import com.scr.project.smm.domains.movie.model.entity.MovieType
 import com.scr.project.smm.entrypoint.model.api.Views.MovieListView
 import jakarta.validation.constraints.NotBlank
@@ -24,4 +25,4 @@ data class MovieApiDto(
     val synopsis: String? = null,
     @JsonView(MovieListView::class)
     var id: String? = null
-)
+) : DTO
