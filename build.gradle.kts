@@ -5,6 +5,7 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.7"
     id("org.sonarqube") version "6.0.1.5171"
     id("jacoco")
+    id("com.epages.restdocs-api-spec") version "0.19.4"
 }
 
 group = "com.scr.project"
@@ -65,6 +66,20 @@ dependencies {
     testImplementation("org.testcontainers:mongodb")
     testImplementation("com.scr.project.commons.cinema.test:commons-cinema-test:$commonsCinemaVersion")
     testImplementation("org.springframework.cloud:spring-cloud-contract-wiremock")
+    testImplementation("org.springframework.restdocs:spring-restdocs-webtestclient")
+    testImplementation("org.springframework.restdocs:spring-restdocs-asciidoctor")
+    testImplementation("com.epages:restdocs-api-spec:0.19.4") {
+        exclude(
+            group = "org.springframework.boot",
+            module = "spring-boot-starter-web"
+        )
+    }
+    testImplementation("com.epages:restdocs-api-spec-webtestclient:0.19.4") {
+        exclude(
+            group = "org.springframework.boot",
+            module = "spring-boot-starter-web"
+        )
+    }
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
@@ -120,4 +135,17 @@ sonar {
         property("sonar.projectKey", "cinema7590904_service-movie-management")
         property("sonar.organization", "cinema7590904")
     }
+}
+
+openapi3 {
+    title = "service-movie-management"
+    description = "This application aims to manage the movies and their main characteristics"
+    format = "yaml"
+}
+
+afterEvaluate {
+    tasks.findByName("openapi3")?.finalizedBy(tasks.register<Copy>("copyApiSpecToDocs") {
+        from("build/api-spec")
+        into("docs")
+    })
 }

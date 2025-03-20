@@ -1,0 +1,403 @@
+openapi: 3.0.1
+info:
+  title: service-movie-management
+  description: This application aims to manage the movies and their main characteristics
+  version: 1.0.0
+servers:
+- url: http://localhost
+tags: []
+paths:
+  api/movies:
+    get:
+      tags:
+      - Movies
+      summary: List movies
+      description: List movies
+      operationId: list-
+      parameters:
+      - name: startDate
+        in: query
+        description: To only select movies released after this date
+        required: false
+        schema:
+          type: string
+      - name: endDate
+        in: query
+        description: To only select movies released before this date
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/api-movies250734524"
+              examples:
+                list-all:
+                  value: "[ {\r\n  \"title\" : \"Pulp Fiction\",\r\n  \"releaseDate\"\
+                    \ : \"1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" :\
+                    \ \"67c09246c908c7ee39bc5e88\"\r\n}, {\r\n  \"title\" : \"The\
+                    \ Dark Knight\",\r\n  \"releaseDate\" : \"2008-07-18\",\r\n  \"\
+                    type\" : \"Drama\",\r\n  \"id\" : \"67c09246c908c7ee39bc5e89\"\
+                    \r\n} ]"
+                list-empty:
+                  value: "[ ]"
+        "206":
+          description: "206"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/api-movies1443622531"
+              examples:
+                list-partial:
+                  value: "[ {\r\n  \"title\" : \"IBTPe\",\r\n  \"releaseDate\" : \"\
+                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67dc29ac68271577e8b9b6b5\"\
+                    \r\n}, {\r\n  \"title\" : \"QyHzZ\",\r\n  \"releaseDate\" : \"\
+                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67dc29ac68271577e8b9b6c1\"\
+                    \r\n}, {\r\n  \"title\" : \"SNDuy\",\r\n  \"releaseDate\" : \"\
+                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67dc29ac68271577e8b9b6be\"\
+                    \r\n}, {\r\n  \"title\" : \"TlQNb\",\r\n  \"releaseDate\" : \"\
+                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67dc29ac68271577e8b9b6b9\"\
+                    \r\n}, {\r\n  \"title\" : \"WJLer\",\r\n  \"releaseDate\" : \"\
+                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67dc29ac68271577e8b9b6b6\"\
+                    \r\n}, {\r\n  \"title\" : \"aPtGi\",\r\n  \"releaseDate\" : \"\
+                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67dc29ac68271577e8b9b6b7\"\
+                    \r\n}, {\r\n  \"title\" : \"ahMLX\",\r\n  \"releaseDate\" : \"\
+                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67dc29ac68271577e8b9b6bb\"\
+                    \r\n}, {\r\n  \"title\" : \"ariPg\",\r\n  \"releaseDate\" : \"\
+                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67dc29ac68271577e8b9b6bc\"\
+                    \r\n}, {\r\n  \"title\" : \"bMcxg\",\r\n  \"releaseDate\" : \"\
+                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67dc29ac68271577e8b9b6ba\"\
+                    \r\n}, {\r\n  \"title\" : \"czjlY\",\r\n  \"releaseDate\" : \"\
+                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67dc29ac68271577e8b9b6b8\"\
+                    \r\n} ]"
+        "401":
+          description: "401"
+      security:
+      - bearerAuthJWT: []
+    post:
+      tags:
+      - Movies
+      summary: Create a movie
+      description: Create a movie
+      operationId: create-conflictcreate-forbiddencreate-release-date-in-futurecreate-unauthorizedmovie-createmovie-create-with-actors
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/api-movies732747875"
+            examples:
+              create-conflict:
+                value: "{\"title\":\"Pulp Fiction\",\"releaseDate\":\"1994-10-14\"\
+                  ,\"type\":\"Drama\",\"actors\":[]}"
+              create-forbidden:
+                value: "{\"title\":\"The Mask\",\"releaseDate\":\"1994-07-29\",\"\
+                  type\":\"Comedy\",\"actors\":[]}"
+              create-release-date-in-future:
+                value: "{\"title\":\"The Mask\",\"releaseDate\":\"2025-03-30\",\"\
+                  type\":\"Comedy\",\"actors\":[]}"
+              create-unauthorized:
+                value: "{\"title\":\"The Mask\",\"releaseDate\":\"1994-07-29\",\"\
+                  type\":\"Comedy\",\"actors\":[]}"
+              movie-create:
+                value: "{\"title\":\"The Mask\",\"releaseDate\":\"1994-07-29\",\"\
+                  type\":\"Comedy\",\"actors\":[]}"
+              movie-create-with-actors:
+                value: "{\"title\":\"The Mask\",\"releaseDate\":\"1994-07-29\",\"\
+                  type\":\"Comedy\",\"actors\":[]}"
+      responses:
+        "409":
+          description: "409"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/api-movies-id486549215"
+              examples:
+                create-conflict:
+                  value: "{\r\n  \"errorCode\" : \"DUPLICATE_KEY\",\r\n  \"errorReason\"\
+                    \ : \"Already existing key\",\r\n  \"message\" : \"The input request\
+                    \ defines a movie that already exists.\"\r\n}"
+        "403":
+          description: "403"
+        "400":
+          description: "400"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/api-movies-id486549215"
+              examples:
+                create-release-date-in-future:
+                  value: "{\r\n  \"timestamp\" : \"2025-03-20T14:43:57.221+00:00\"\
+                    ,\r\n  \"path\" : \"/api/movies\",\r\n  \"status\" : 400,\r\n\
+                    \  \"error\" : \"Bad Request\",\r\n  \"requestId\" : \"69a35ccd\"\
+                    \r\n}"
+        "401":
+          description: "401"
+        "201":
+          description: "201"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/api-movies-1385517347"
+              examples:
+                movie-create:
+                  value: "{\r\n  \"title\" : \"The Mask\",\r\n  \"releaseDate\" :\
+                    \ \"1994-07-29\",\r\n  \"type\" : \"Comedy\",\r\n  \"actors\"\
+                    \ : [ ],\r\n  \"synopsis\" : \"\\\"The Dark Knight\\\" explores\
+                    \ themes of chaos, morality, and the limits of heroism as Batman\
+                    \ confronts the Joker, a nihilistic criminal who tests the ethical\
+                    \ boundaries of Gotham City.\",\r\n  \"id\" : \"67dc29ac68271577e8b9b6b3\"\
+                    \r\n}"
+                movie-create-with-actors:
+                  value: "{\r\n  \"title\" : \"The Mask\",\r\n  \"releaseDate\" :\
+                    \ \"1994-07-29\",\r\n  \"type\" : \"Comedy\",\r\n  \"actors\"\
+                    \ : [ ],\r\n  \"synopsis\" : \"\\\"The Dark Knight\\\" explores\
+                    \ themes of chaos, morality, and the limits of heroism as Batman\
+                    \ confronts the Joker, a nihilistic criminal who tests the ethical\
+                    \ boundaries of Gotham City.\",\r\n  \"id\" : \"67dc29ad68271577e8b9b6c5\"\
+                    \r\n}"
+      security:
+      - bearerAuthJWT: []
+  api/movies/{id}:
+    get:
+      tags:
+      - Movies
+      summary: Find movie by id
+      description: Find movie by id
+      operationId: find-does-no-existfind-unauthorizedmovie-find-by-idmovie-find-by-id-with-actors
+      parameters:
+      - name: id
+        in: path
+        description: ""
+        required: true
+        schema:
+          type: string
+      responses:
+        "404":
+          description: "404"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/api-movies-id486549215"
+              examples:
+                find-does-no-exist:
+                  value: "{\r\n  \"errorCode\" : \"MOVIE_NOT_FOUND\",\r\n  \"errorReason\"\
+                    \ : \"Movie is not registered\",\r\n  \"message\" : \"The movie\
+                    \ with id 67dc29ad68271577e8b9b6c3 was not found.\"\r\n}"
+        "401":
+          description: "401"
+        "200":
+          description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/api-movies-id2082974597"
+              examples:
+                movie-find-by-id:
+                  value: "{\r\n  \"title\" : \"Pulp Fiction\",\r\n  \"releaseDate\"\
+                    \ : \"1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"actors\"\
+                    \ : [ ],\r\n  \"synopsis\" : \"\\\\\\\"Pulp Fiction,\\\\\\\" directed\
+                    \ by Quentin Tarantino, is a non-linear, interwoven crime film\
+                    \ that follows several characters, including two hitmen, a gangster's\
+                    \ wife, and a boxer, as they navigate the seedy underbelly of\
+                    \ Los Angeles, themes of violence, redemption, and fate.\",\r\n\
+                    \  \"id\" : \"67c09246c908c7ee39bc5e88\"\r\n}"
+                movie-find-by-id-with-actors:
+                  value: "{\r\n  \"title\" : \"The Dark Knight\",\r\n  \"releaseDate\"\
+                    \ : \"2008-07-18\",\r\n  \"type\" : \"Drama\",\r\n  \"actors\"\
+                    \ : [ {\r\n    \"id\" : \"67c09246c908c7ee39bc5e91\",\r\n    \"\
+                    fullName\" : \"Lambert Wilson\"\r\n  }, {\r\n    \"id\" : \"67c09246c908c7ee39bc5e92\"\
+                    ,\r\n    \"fullName\" : \"Lambert Wilson\"\r\n  } ],\r\n  \"synopsis\"\
+                    \ : \"\\\"The Dark Knight\\\" explores themes of chaos, morality,\
+                    \ and the limits of heroism as Batman confronts the Joker, a nihilistic\
+                    \ criminal who tests the ethical boundaries of Gotham City.\"\
+                    ,\r\n  \"id\" : \"67c09246c908c7ee39bc5e89\"\r\n}"
+      security:
+      - bearerAuthJWT: []
+components:
+  schemas:
+    api-movies-id2082974597:
+      required:
+      - actors
+      - id
+      - releaseDate
+      - synopsis
+      - title
+      - type
+      type: object
+      properties:
+        actors:
+          type: array
+          description: Actors of the movie
+          items:
+            required:
+            - fullName
+            - id
+            type: object
+            properties:
+              fullName:
+                type: string
+                description: Full name of the actor
+              id:
+                type: string
+                description: Unique identifier of the actor
+        releaseDate:
+          type: string
+          description: Release date of the movie
+        synopsis:
+          type: string
+          description: Synopsis of the movie
+        id:
+          type: string
+          description: The unique identifier of the movie
+        type:
+          type: string
+          description: |-
+            Type of the movie. Possible values are: Drama,
+                Comedy,
+                ScienceFiction,
+                Fantasy,
+                Horror,
+                Thriller,
+                Western,
+                Musical,
+        title:
+          type: string
+          description: Title of the movie
+    api-movies-1385517347:
+      required:
+      - actors
+      - id
+      - releaseDate
+      - synopsis
+      - title
+      - type
+      type: object
+      properties:
+        actors:
+          type: array
+          description: Actors of the movie
+          items:
+            oneOf:
+            - type: object
+            - type: boolean
+            - type: string
+            - type: number
+        releaseDate:
+          type: string
+          description: Release date of the movie
+        synopsis:
+          type: string
+          description: Synopsis of the movie
+        id:
+          type: string
+          description: The unique identifier of the movie
+        type:
+          type: string
+          description: |-
+            Type of the movie. Possible values are: Drama,
+                Comedy,
+                ScienceFiction,
+                Fantasy,
+                Horror,
+                Thriller,
+                Western,
+                Musical,
+        title:
+          type: string
+          description: Title of the movie
+    api-movies1443622531:
+      type: array
+      items:
+        required:
+        - id
+        - releaseDate
+        - title
+        - type
+        type: object
+        properties:
+          releaseDate:
+            type: string
+            description: Release date of the movie
+          id:
+            type: string
+            description: The unique identifier of the movie
+          type:
+            type: string
+            description: Type of the movie
+          title:
+            type: string
+            description: Title of the movie
+    api-movies250734524:
+      type: array
+      items:
+        required:
+        - id
+        - releaseDate
+        - title
+        - type
+        type: object
+        properties:
+          releaseDate:
+            type: string
+            description: Release date of the movie
+          id:
+            type: string
+            description: The unique identifier of the movie
+          type:
+            type: string
+            description: |-
+              Type of the movie. Possible values are: Drama,
+                  Comedy,
+                  ScienceFiction,
+                  Fantasy,
+                  Horror,
+                  Thriller,
+                  Western,
+                  Musical,
+          title:
+            type: string
+            description: Title of the movie
+    api-movies-id486549215:
+      type: object
+    api-movies732747875:
+      required:
+      - releaseDate
+      - title
+      - type
+      type: object
+      properties:
+        releaseDate:
+          type: string
+          description: Release date of the movie
+        type:
+          type: string
+          description: |-
+            Type of the movie. Possible values are: Drama,
+                Comedy,
+                ScienceFiction,
+                Fantasy,
+                Horror,
+                Thriller,
+                Western,
+                Musical,
+        title:
+          type: string
+          description: Title of the movie
+        actorIds:
+          type: array
+          description: Identifiers of actors
+          nullable: true
+          items:
+            oneOf:
+            - type: object
+            - type: boolean
+            - type: string
+            - type: number
+  securitySchemes:
+    bearerAuthJWT:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
