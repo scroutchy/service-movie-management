@@ -17,6 +17,7 @@ private val converterJacksonVersion = "2.11.0"
 private val reactorAdapterVersion = "2.1.0"
 private val loggingInterceptorVersion = "4.11.0"
 private val javaJwtVersion = "4.5.0"
+private val jsonWebTokenVersion = "0.11.5"
 
 java {
 	toolchain {
@@ -41,6 +42,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("jakarta.validation:jakarta.validation-api:$jakartaValidationVersion")
     implementation("com.scr.project.commons.cinema:commons-cinema:$commonsCinemaVersion")
@@ -50,6 +53,9 @@ dependencies {
     implementation("com.jakewharton.retrofit:retrofit2-reactor-adapter:$reactorAdapterVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.auth0:java-jwt:$javaJwtVersion")
+    implementation("io.jsonwebtoken:jjwt-api:$jsonWebTokenVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:$jsonWebTokenVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jsonWebTokenVersion")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("io.mockk:mockk:$mockkVersion")

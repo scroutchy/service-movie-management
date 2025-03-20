@@ -12,3 +12,6 @@ mistral:
     url: ${MISTRAL_SERVICE_URL}
   api:
     token: ${MISTRAL_API_TOKEN}
+security:
+  jwt:
+    secretKey: ${JWT_SECRET_KEY_SMM}
