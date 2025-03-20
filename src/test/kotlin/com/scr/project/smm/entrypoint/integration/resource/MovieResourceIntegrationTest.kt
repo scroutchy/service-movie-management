@@ -21,6 +21,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpHeaders.CONTENT_RANGE
 import org.springframework.http.HttpStatus.CONFLICT
 import org.springframework.http.HttpStatus.PARTIAL_CONTENT
@@ -50,6 +51,7 @@ internal class MovieResourceIntegrationTest(
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .post()
             .uri(MOVIE_PATH)
+            .header(AUTHORIZATION, "Bearer ${testJwtUtil.writeToken}")
             .bodyValue(movieRequest)
             .exchange()
             .expectStatus().isCreated
@@ -81,6 +83,7 @@ internal class MovieResourceIntegrationTest(
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .post()
             .uri(MOVIE_PATH)
+            .header(AUTHORIZATION, "Bearer ${testJwtUtil.writeToken}")
             .bodyValue(movieRequest)
             .exchange()
             .expectStatus().isBadRequest
@@ -95,10 +98,37 @@ internal class MovieResourceIntegrationTest(
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .post()
             .uri(MOVIE_PATH)
+            .header(AUTHORIZATION, "Bearer ${testJwtUtil.writeToken}")
             .bodyValue(movieRequest)
             .exchange()
             .expectStatus().isEqualTo(CONFLICT)
         assertThat(movieDao.count()).isEqualTo(initialCount)
+    }
+
+    @Test
+    fun `create should return 401 when authentication fails because wrong token`() {
+        val movieRequest = MovieApiDto("The Mask", LocalDate.of(1994, 7, 29), Comedy)
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .post()
+            .uri(MOVIE_PATH)
+            .header(AUTHORIZATION, "Bearer dummyToken")
+            .bodyValue(movieRequest)
+            .exchange()
+            .expectStatus().isUnauthorized
+            .expectBody(ErrorResponse::class.java)
+    }
+
+    @Test
+    fun `create should return 403 when authorization fails because no matching role`() {
+        val movieRequest = MovieApiDto("The Mask", LocalDate.of(1994, 7, 29), Comedy)
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .post()
+            .uri(MOVIE_PATH)
+            .header(AUTHORIZATION, "Bearer ${testJwtUtil.standardToken}")
+            .bodyValue(movieRequest)
+            .exchange()
+            .expectStatus().isForbidden
+            .expectBody(ErrorResponse::class.java)
     }
 
     @Test
@@ -107,6 +137,7 @@ internal class MovieResourceIntegrationTest(
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .get()
             .uri("$MOVIE_PATH$ID_PATH", movieResponse.id)
+            .header(AUTHORIZATION, "Bearer ${testJwtUtil.standardToken}")
             .exchange()
             .expectStatus().isOk
             .expectBody(MovieApiDto::class.java)
@@ -129,6 +160,7 @@ internal class MovieResourceIntegrationTest(
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .get()
             .uri("$MOVIE_PATH$ID_PATH", movieResponse.id)
+            .header(AUTHORIZATION, "Bearer ${testJwtUtil.standardToken}")
             .exchange()
             .expectStatus().isOk
             .expectBody(MovieApiDto::class.java)
@@ -155,8 +187,19 @@ internal class MovieResourceIntegrationTest(
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .get()
             .uri("$MOVIE_PATH$ID_PATH", ObjectId.get().toHexString())
+            .header(AUTHORIZATION, "Bearer ${testJwtUtil.standardToken}")
             .exchange()
             .expectStatus().isNotFound
+            .expectBody(ErrorResponse::class.java)
+    }
+
+    @Test
+    fun `find should return 401 when authentication fails because no token in header`() {
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .get()
+            .uri("$MOVIE_PATH$ID_PATH", ObjectId.get().toHexString())
+            .exchange()
+            .expectStatus().isUnauthorized
             .expectBody(ErrorResponse::class.java)
     }
 
@@ -165,6 +208,7 @@ internal class MovieResourceIntegrationTest(
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .get()
             .uri(MOVIE_PATH)
+            .header(AUTHORIZATION, "Bearer ${testJwtUtil.standardToken}")
             .exchange()
             .expectStatus().isOk
             .expectBodyList(MovieApiDto::class.java)
@@ -198,6 +242,7 @@ internal class MovieResourceIntegrationTest(
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .get()
             .uri("$MOVIE_PATH?startDate=$startDate&&endDate=$endDate")
+            .header(AUTHORIZATION, "Bearer ${testJwtUtil.standardToken}")
             .exchange()
             .expectStatus().isOk
             .expectBodyList(MovieApiDto::class.java)
@@ -219,6 +264,7 @@ internal class MovieResourceIntegrationTest(
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .get()
             .uri(MOVIE_PATH)
+            .header(AUTHORIZATION, "Bearer ${testJwtUtil.standardToken}")
             .exchange()
             .expectStatus().isEqualTo(PARTIAL_CONTENT)
             .expectBodyList(MovieApiDto::class.java)
@@ -243,6 +289,17 @@ internal class MovieResourceIntegrationTest(
                     }
                 }
             }
+    }
+
+    @Test
+    fun `list should return 401 when authentication fails because wrong token in header`() {
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .get()
+            .uri(MOVIE_PATH)
+            .header(AUTHORIZATION, "Bearer dummyToken")
+            .exchange()
+            .expectStatus().isUnauthorized
+            .expectBody(ErrorResponse::class.java)
     }
 
     private fun generateListOfMovies(size: Int): List<Movie> {

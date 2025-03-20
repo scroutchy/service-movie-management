@@ -13,3 +13,6 @@ mistral:
     url: http://localhost:${wiremock.server.port}
   api:
     token: dummy
+security:
+  jwt:
+    secretKey: dummySecretKeyForTestingPurposeOnly
