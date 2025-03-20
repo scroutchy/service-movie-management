@@ -1,5 +1,9 @@
 package com.scr.project.smm.entrypoint.integration.resource
 
+import com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName
+import com.epages.restdocs.apispec.ResourceDocumentation.resource
+import com.epages.restdocs.apispec.ResourceSnippetParameters
+import com.epages.restdocs.apispec.WebTestClientRestDocumentationWrapper
 import com.scr.project.smm.AbstractIntegrationTest
 import com.scr.project.smm.domains.movie.dao.MovieDao
 import com.scr.project.smm.domains.movie.dao.pulpFiction
@@ -17,6 +21,7 @@ import org.bson.types.ObjectId
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
@@ -25,15 +30,22 @@ import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpHeaders.CONTENT_RANGE
 import org.springframework.http.HttpStatus.CONFLICT
 import org.springframework.http.HttpStatus.PARTIAL_CONTENT
+import org.springframework.restdocs.RestDocumentationContextProvider
+import org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse
+import org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint
+import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
+import org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation.documentationConfiguration
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.WebTestClient.ListBodySpec
 import java.time.LocalDate
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @AutoConfigureWebTestClient
+@AutoConfigureRestDocs
 internal class MovieResourceIntegrationTest(
     @Autowired private val webTestClient: WebTestClient,
     @Autowired private val movieDao: MovieDao,
+    @Autowired private val restDocumentation: RestDocumentationContextProvider,
 ) : AbstractIntegrationTest() {
 
     @LocalServerPort
@@ -44,11 +56,21 @@ internal class MovieResourceIntegrationTest(
         movieDao.initTestData()
     }
 
+    private companion object {
+
+        const val MOVIE_TAG = "Movies"
+        const val GET_SUMMARY = "Find movie by id"
+        const val POST_SUMMARY = "Create a movie"
+        const val LIST_SUMMARY = "List movies"
+    }
+
     @Test
     fun `create should succeed and create a movie in database`() {
         val movieRequest = MovieApiDto("The Mask", LocalDate.of(1994, 7, 29), Comedy)
         val initialCount = movieDao.count()
-        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+        webTestClient.mutate().baseUrl("http://localhost:$port")
+            .filter(documentationConfiguration(restDocumentation))
+            .build()
             .post()
             .uri(MOVIE_PATH)
             .header(AUTHORIZATION, "Bearer ${testJwtUtil.writeToken}")
@@ -56,9 +78,54 @@ internal class MovieResourceIntegrationTest(
             .exchange()
             .expectStatus().isCreated
             .expectBody(MovieApiDto::class.java)
+            .consumeWith(
+                WebTestClientRestDocumentationWrapper.document(
+                    "movie-create",
+                    preprocessResponse(prettyPrint()),
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .tag(MOVIE_TAG)
+                            .summary(POST_SUMMARY)
+                            .description("Create a new movie based on its characteristics")
+                            .requestFields(
+                                fieldWithPath("title").description("Title of the movie"),
+                                fieldWithPath("releaseDate").description("Release date of the movie"),
+                                fieldWithPath("type").description(
+                                    "Type of the movie. Possible values are: Drama,\n" +
+                                            "    Comedy,\n" +
+                                            "    ScienceFiction,\n" +
+                                            "    Fantasy,\n" +
+                                            "    Horror,\n" +
+                                            "    Thriller,\n" +
+                                            "    Western,\n" +
+                                            "    Musical,"
+                                ),
+                                fieldWithPath("actorIds").description("Identifiers of actors").type("ARRAY").optional(),
+                                fieldWithPath("actors").description("Actors of the movie").type("ARRAY").ignored(),
+                            )
+                            .responseFields(
+                                fieldWithPath("id").description("The unique identifier of the movie"),
+                                fieldWithPath("title").description("Title of the movie"),
+                                fieldWithPath("releaseDate").description("Release date of the movie"),
+                                fieldWithPath("type").description(
+                                    "Type of the movie. Possible values are: Drama,\n" +
+                                            "    Comedy,\n" +
+                                            "    ScienceFiction,\n" +
+                                            "    Fantasy,\n" +
+                                            "    Horror,\n" +
+                                            "    Thriller,\n" +
+                                            "    Western,\n" +
+                                            "    Musical,"
+                                ),
+                                fieldWithPath("synopsis").description("Synopsis of the movie"),
+                                fieldWithPath("actors").description("Actors of the movie").type("ARRAY"),
+                            ).build()
+                    )
+                )
+            )
             .consumeWith {
-                val body = it.responseBody
-                with(body!!) {
+                val body = it.responseBody as MovieApiDto
+                with(body) {
                     assertThat(title).isEqualTo(movieRequest.title)
                     assertThat(releaseDate).isEqualTo(movieRequest.releaseDate)
                     assertThat(type).isEqualTo(movieRequest.type)
@@ -66,8 +133,87 @@ internal class MovieResourceIntegrationTest(
                     assertThat(id).isNotNull
                 }
                 assertThat(movieDao.count()).isEqualTo(initialCount + 1)
-                val actor = movieDao.findById(ObjectId(body.id!!))
-                with(actor!!) {
+                val movie = movieDao.findById(ObjectId(body.id!!))
+                with(movie!!) {
+                    assertThat(id).isEqualTo(ObjectId(body.id))
+                    assertThat(title).isEqualTo(body.title)
+                    assertThat(releaseDate).isEqualTo(body.releaseDate)
+                    assertThat(type).isEqualTo(body.type)
+                }
+            }
+    }
+
+    @Test
+    fun `create should succeed and create a movie in database with actors in it`() {
+        val movieRequest = MovieApiDto("The Mask", LocalDate.of(1994, 7, 29), Comedy, listOf(ObjectId.get().toHexString()))
+        val initialCount = movieDao.count()
+        webTestClient.mutate().baseUrl("http://localhost:$port")
+            .filter(documentationConfiguration(restDocumentation))
+            .build()
+            .post()
+            .uri(MOVIE_PATH)
+            .header(AUTHORIZATION, "Bearer ${testJwtUtil.writeToken}")
+            .bodyValue(movieRequest)
+            .exchange()
+            .expectStatus().isCreated
+            .expectBody(MovieApiDto::class.java)
+            .consumeWith(
+                WebTestClientRestDocumentationWrapper.document(
+                    "movie-create-with-actors",
+                    preprocessResponse(prettyPrint()),
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .tag(MOVIE_TAG)
+                            .summary(POST_SUMMARY)
+                            .description("Create a new movie based on its characteristics")
+                            .requestFields(
+                                fieldWithPath("title").description("Title of the movie"),
+                                fieldWithPath("releaseDate").description("Release date of the movie"),
+                                fieldWithPath("type").description(
+                                    "Type of the movie. Possible values are: Drama,\n" +
+                                            "    Comedy,\n" +
+                                            "    ScienceFiction,\n" +
+                                            "    Fantasy,\n" +
+                                            "    Horror,\n" +
+                                            "    Thriller,\n" +
+                                            "    Western,\n" +
+                                            "    Musical,"
+                                ),
+                                fieldWithPath("actors").description("Actors of the movie").type("ARRAY").ignored(),
+                            )
+                            .responseFields(
+                                fieldWithPath("id").description("The unique identifier of the movie"),
+                                fieldWithPath("title").description("Title of the movie"),
+                                fieldWithPath("releaseDate").description("Release date of the movie"),
+                                fieldWithPath("type").description(
+                                    "Type of the movie. Possible values are: Drama,\n" +
+                                            "    Comedy,\n" +
+                                            "    ScienceFiction,\n" +
+                                            "    Fantasy,\n" +
+                                            "    Horror,\n" +
+                                            "    Thriller,\n" +
+                                            "    Western,\n" +
+                                            "    Musical,"
+                                ),
+                                fieldWithPath("synopsis").description("Synopsis of the movie"),
+                                fieldWithPath("actors").description("Actors of the movie").type("ARRAY"),
+                            ).build()
+                    )
+                )
+            )
+            .consumeWith {
+                val body = it.responseBody as MovieApiDto
+                with(body) {
+                    assertThat(title).isEqualTo(movieRequest.title)
+                    assertThat(releaseDate).isEqualTo(movieRequest.releaseDate)
+                    assertThat(type).isEqualTo(movieRequest.type)
+                    assertThat(actors).isEmpty()
+                    assertThat(synopsis).isEqualTo("\"The Dark Knight\" explores themes of chaos, morality, and the limits of heroism as Batman confronts the Joker, a nihilistic criminal who tests the ethical boundaries of Gotham City.")
+                    assertThat(id).isNotNull
+                }
+                assertThat(movieDao.count()).isEqualTo(initialCount + 1)
+                val movie = movieDao.findById(ObjectId(body.id!!))
+                with(movie!!) {
                     assertThat(id).isEqualTo(ObjectId(body.id))
                     assertThat(title).isEqualTo(body.title)
                     assertThat(releaseDate).isEqualTo(body.releaseDate)
@@ -80,7 +226,8 @@ internal class MovieResourceIntegrationTest(
     fun `create should fail when release date is in future`() {
         val movieRequest = MovieApiDto("The Mask", LocalDate.now().plusDays(10), Comedy)
         val initialCount = movieDao.count()
-        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+        webTestClient.mutate().baseUrl("http://localhost:$port")
+            .filter(documentationConfiguration(restDocumentation)).build()
             .post()
             .uri(MOVIE_PATH)
             .header(AUTHORIZATION, "Bearer ${testJwtUtil.writeToken}")
@@ -88,6 +235,18 @@ internal class MovieResourceIntegrationTest(
             .exchange()
             .expectStatus().isBadRequest
             .expectBody(Exception::class.java)
+            .consumeWith(
+                WebTestClientRestDocumentationWrapper.document(
+                    "create-release-date-in-future",
+                    preprocessResponse(prettyPrint()),
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .tags(MOVIE_TAG)
+                            .summary(POST_SUMMARY)
+                            .build()
+                    )
+                )
+            )
         assertThat(movieDao.count()).isEqualTo(initialCount)
     }
 
@@ -95,13 +254,27 @@ internal class MovieResourceIntegrationTest(
     fun `create should fail when the title of the movie already exists in database`() {
         val movieRequest = MovieApiDto("Pulp Fiction", LocalDate.of(1994, 10, 14), Drama)
         val initialCount = movieDao.count()
-        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+        webTestClient.mutate().baseUrl("http://localhost:$port")
+            .filter(documentationConfiguration(restDocumentation)).build()
             .post()
             .uri(MOVIE_PATH)
             .header(AUTHORIZATION, "Bearer ${testJwtUtil.writeToken}")
             .bodyValue(movieRequest)
             .exchange()
             .expectStatus().isEqualTo(CONFLICT)
+            .expectBody(Exception::class.java)
+            .consumeWith(
+                WebTestClientRestDocumentationWrapper.document(
+                    "create-conflict",
+                    preprocessResponse(prettyPrint()),
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .tags(MOVIE_TAG)
+                            .summary(POST_SUMMARY)
+                            .build()
+                    )
+                )
+            )
         assertThat(movieDao.count()).isEqualTo(initialCount)
     }
 
@@ -116,6 +289,18 @@ internal class MovieResourceIntegrationTest(
             .exchange()
             .expectStatus().isUnauthorized
             .expectBody(ErrorResponse::class.java)
+            .consumeWith(
+                WebTestClientRestDocumentationWrapper.document(
+                    "create-unauthorized",
+                    preprocessResponse(prettyPrint()),
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .tags(MOVIE_TAG)
+                            .summary(POST_SUMMARY)
+                            .build()
+                    )
+                )
+            )
     }
 
     @Test
@@ -129,22 +314,68 @@ internal class MovieResourceIntegrationTest(
             .exchange()
             .expectStatus().isForbidden
             .expectBody(ErrorResponse::class.java)
+            .consumeWith(
+                WebTestClientRestDocumentationWrapper.document(
+                    "create-forbidden",
+                    preprocessResponse(prettyPrint()),
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .tags(MOVIE_TAG)
+                            .summary(POST_SUMMARY)
+                            .build()
+                    )
+                )
+            )
     }
 
     @Test
     fun `find should succeed and returns a movie response when id exists`() {
         val movieResponse = movieDao.findAnyBy { it.actors.isEmpty() }!!.toApiDto()
-        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+        webTestClient.mutate().baseUrl("http://localhost:$port")
+            .filter(documentationConfiguration(restDocumentation))
+            .build()
             .get()
             .uri("$MOVIE_PATH$ID_PATH", movieResponse.id)
             .header(AUTHORIZATION, "Bearer ${testJwtUtil.standardToken}")
             .exchange()
             .expectStatus().isOk
             .expectBody(MovieApiDto::class.java)
+            .consumeWith(
+                WebTestClientRestDocumentationWrapper.document(
+                    "movie-find-by-id",
+                    preprocessResponse(prettyPrint()),
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .tag(MOVIE_TAG)
+                            .summary(GET_SUMMARY)
+                            .description("Retrieve a movie based on its unique identifier")
+                            .pathParameters(
+                                parameterWithName("id").description("Unique identifier of the movie")
+                            )
+                            .responseFields(
+                                fieldWithPath("id").description("The unique identifier of the movie"),
+                                fieldWithPath("title").description("Title of the movie"),
+                                fieldWithPath("releaseDate").description("Release date of the movie"),
+                                fieldWithPath("type").description(
+                                    "Type of the movie. Possible values are: Drama,\n" +
+                                            "    Comedy,\n" +
+                                            "    ScienceFiction,\n" +
+                                            "    Fantasy,\n" +
+                                            "    Horror,\n" +
+                                            "    Thriller,\n" +
+                                            "    Western,\n" +
+                                            "    Musical,"
+                                ),
+                                fieldWithPath("synopsis").description("Synopsis of the movie"),
+                                fieldWithPath("actors").description("Actors of the movie").type("ARRAY"),
+                            ).build()
+                    )
+                )
+            )
             .consumeWith {
-                val body = it.responseBody
+                val body = it.responseBody as MovieApiDto
                 assertThat(body).isNotNull
-                with(body!!) {
+                with(body) {
                     assertThat(id).isEqualTo(movieResponse.id)
                     assertThat(title).isEqualTo(movieResponse.title)
                     assertThat(releaseDate).isEqualTo(movieResponse.releaseDate)
@@ -157,17 +388,53 @@ internal class MovieResourceIntegrationTest(
     @Test
     fun `find should succeed and returns a movie response when id exists and list of actors is not empty`() {
         val movieResponse = movieDao.findAnyBy { it.actors.isNotEmpty() }!!.toApiDto()
-        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+        webTestClient.mutate().baseUrl("http://localhost:$port")
+            .filter(documentationConfiguration(restDocumentation))
+            .build()
             .get()
             .uri("$MOVIE_PATH$ID_PATH", movieResponse.id)
             .header(AUTHORIZATION, "Bearer ${testJwtUtil.standardToken}")
             .exchange()
             .expectStatus().isOk
             .expectBody(MovieApiDto::class.java)
+            .consumeWith(
+                WebTestClientRestDocumentationWrapper.document(
+                    "movie-find-by-id-with-actors",
+                    preprocessResponse(prettyPrint()),
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .tag(MOVIE_TAG)
+                            .summary(GET_SUMMARY)
+                            .description("Retrieve a movie based on its unique identifier")
+                            .pathParameters(
+                                parameterWithName("id").description("Unique identifier of the movie")
+                            )
+                            .responseFields(
+                                fieldWithPath("id").description("The unique identifier of the movie"),
+                                fieldWithPath("title").description("Title of the movie"),
+                                fieldWithPath("releaseDate").description("Release date of the movie"),
+                                fieldWithPath("type").description(
+                                    "Type of the movie. Possible values are: Drama,\n" +
+                                            "    Comedy,\n" +
+                                            "    ScienceFiction,\n" +
+                                            "    Fantasy,\n" +
+                                            "    Horror,\n" +
+                                            "    Thriller,\n" +
+                                            "    Western,\n" +
+                                            "    Musical,"
+                                ),
+                                fieldWithPath("synopsis").description("Synopsis of the movie"),
+                                fieldWithPath("actors").description("Actors of the movie").type("ARRAY"),
+                                fieldWithPath("actors.[].id").description("Unique identifier of the actor"),
+                                fieldWithPath("actors.[].fullName").description("Full name of the actor"),
+                            ).build()
+                    )
+                )
+            )
             .consumeWith {
-                val body = it.responseBody
+                val body = it.responseBody as MovieApiDto
                 assertThat(body).isNotNull
-                with(body!!) {
+                with(body) {
                     assertThat(id).isEqualTo(movieResponse.id)
                     assertThat(title).isEqualTo(movieResponse.title)
                     assertThat(releaseDate).isEqualTo(movieResponse.releaseDate)
@@ -184,28 +451,58 @@ internal class MovieResourceIntegrationTest(
 
     @Test
     fun `find should return 404 when id does not exist`() {
-        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+        webTestClient.mutate().baseUrl("http://localhost:$port")
+            .filter(documentationConfiguration(restDocumentation))
+            .build()
             .get()
             .uri("$MOVIE_PATH$ID_PATH", ObjectId.get().toHexString())
             .header(AUTHORIZATION, "Bearer ${testJwtUtil.standardToken}")
             .exchange()
             .expectStatus().isNotFound
             .expectBody(ErrorResponse::class.java)
+            .consumeWith(
+                WebTestClientRestDocumentationWrapper.document(
+                    "find-does-no-exist",
+                    preprocessResponse(prettyPrint()),
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .tags(MOVIE_TAG)
+                            .summary(GET_SUMMARY)
+                            .build()
+                    )
+                )
+            )
     }
 
     @Test
     fun `find should return 401 when authentication fails because no token in header`() {
-        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+        webTestClient.mutate().baseUrl("http://localhost:$port")
+            .filter(documentationConfiguration(restDocumentation))
+            .build()
             .get()
             .uri("$MOVIE_PATH$ID_PATH", ObjectId.get().toHexString())
             .exchange()
             .expectStatus().isUnauthorized
             .expectBody(ErrorResponse::class.java)
+            .consumeWith(
+                WebTestClientRestDocumentationWrapper.document(
+                    "find-unauthorized",
+                    preprocessResponse(prettyPrint()),
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .tags(MOVIE_TAG)
+                            .summary(GET_SUMMARY)
+                            .build()
+                    )
+                )
+            )
     }
 
     @Test
     fun `list should succeed and return all movies when no date is provided`() {
-        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+        webTestClient.mutate().baseUrl("http://localhost:$port")
+            .filter(documentationConfiguration(restDocumentation))
+            .build()
             .get()
             .uri(MOVIE_PATH)
             .header(AUTHORIZATION, "Bearer ${testJwtUtil.standardToken}")
@@ -233,6 +530,37 @@ internal class MovieResourceIntegrationTest(
                     }
                 }
             }
+            .consumeWith<ListBodySpec<MovieApiDto>>(
+                WebTestClientRestDocumentationWrapper.document(
+                    "list-all",
+                    preprocessResponse(prettyPrint()),
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .tags(MOVIE_TAG)
+                            .summary(LIST_SUMMARY)
+                            .queryParameters(
+                                parameterWithName("startDate").description("To only select movies released after this date").optional(),
+                                parameterWithName("endDate").description("To only select movies released before this date").optional(),
+                            )
+                            .responseFields(
+                                fieldWithPath("[].id").description("The unique identifier of the movie"),
+                                fieldWithPath("[].title").description("Title of the movie"),
+                                fieldWithPath("[].releaseDate").description("Release date of the movie"),
+                                fieldWithPath("[].type").description(
+                                    "Type of the movie. Possible values are: Drama,\n" +
+                                            "    Comedy,\n" +
+                                            "    ScienceFiction,\n" +
+                                            "    Fantasy,\n" +
+                                            "    Horror,\n" +
+                                            "    Thriller,\n" +
+                                            "    Western,\n" +
+                                            "    Musical,"
+                                ),
+                            )
+                            .build()
+                    )
+                )
+            )
     }
 
     @Test
@@ -254,6 +582,22 @@ internal class MovieResourceIntegrationTest(
                 assertThat(body).isNotNull
                 assertThat(body).isEmpty()
             }
+            .consumeWith<ListBodySpec<MovieApiDto>>(
+                WebTestClientRestDocumentationWrapper.document(
+                    "list-empty",
+                    preprocessResponse(prettyPrint()),
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .tags(MOVIE_TAG)
+                            .summary(LIST_SUMMARY)
+                            .queryParameters(
+                                parameterWithName("startDate").description("To only select movies released after this date").optional(),
+                                parameterWithName("endDate").description("To only select movies released before this date").optional(),
+                            )
+                            .build()
+                    )
+                )
+            )
     }
 
     @Test
@@ -289,6 +633,28 @@ internal class MovieResourceIntegrationTest(
                     }
                 }
             }
+            .consumeWith<ListBodySpec<MovieApiDto>>(
+                WebTestClientRestDocumentationWrapper.document(
+                    "list-partial",
+                    preprocessResponse(prettyPrint()),
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .tags(MOVIE_TAG)
+                            .summary(LIST_SUMMARY)
+                            .queryParameters(
+                                parameterWithName("startDate").description("To only select movies released after this date").optional(),
+                                parameterWithName("endDate").description("To only select movies released before this date").optional(),
+                            )
+                            .responseFields(
+                                fieldWithPath("[].id").description("The unique identifier of the movie"),
+                                fieldWithPath("[].title").description("Title of the movie"),
+                                fieldWithPath("[].releaseDate").description("Release date of the movie"),
+                                fieldWithPath("[].type").description("Type of the movie"),
+                            )
+                            .build()
+                    )
+                )
+            )
     }
 
     @Test
@@ -300,6 +666,18 @@ internal class MovieResourceIntegrationTest(
             .exchange()
             .expectStatus().isUnauthorized
             .expectBody(ErrorResponse::class.java)
+            .consumeWith(
+                WebTestClientRestDocumentationWrapper.document(
+                    "list-unauthorized",
+                    preprocessResponse(prettyPrint()),
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .tags(MOVIE_TAG)
+                            .summary(GET_SUMMARY)
+                            .build()
+                    )
+                )
+            )
     }
 
     private fun generateListOfMovies(size: Int): List<Movie> {
