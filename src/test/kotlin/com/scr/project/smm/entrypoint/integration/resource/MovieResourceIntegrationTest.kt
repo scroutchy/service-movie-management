@@ -251,6 +251,33 @@ internal class MovieResourceIntegrationTest(
     }
 
     @Test
+    fun `create should fail and return 500 when synopsis was not generated`() {
+        val movieRequest = MovieApiDto("unknown", LocalDate.of(1900, 7, 29), Comedy, listOf(ObjectId.get().toHexString()))
+        webTestClient.mutate().baseUrl("http://localhost:$port")
+            .filter(documentationConfiguration(restDocumentation))
+            .build()
+            .post()
+            .uri(MOVIE_PATH)
+            .header(AUTHORIZATION, "Bearer ${testJwtUtil.writeToken}")
+            .bodyValue(movieRequest)
+            .exchange()
+            .expectStatus().isEqualTo(500)
+            .expectBody(Exception::class.java)
+            .consumeWith(
+                WebTestClientRestDocumentationWrapper.document(
+                    "create-no-synopsis-generated",
+                    preprocessResponse(prettyPrint()),
+                    resource(
+                        ResourceSnippetParameters.builder()
+                            .tags(MOVIE_TAG)
+                            .summary(POST_SUMMARY)
+                            .build()
+                    )
+                )
+            )
+    }
+
+    @Test
     fun `create should fail when the title of the movie already exists in database`() {
         val movieRequest = MovieApiDto("Pulp Fiction", LocalDate.of(1994, 10, 14), Drama)
         val initialCount = movieDao.count()

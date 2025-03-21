@@ -29,7 +29,7 @@ class MovieService(
     private val logger: Logger = LoggerFactory.getLogger(MovieService::class.java)
 
     override fun create(movie: Movie): Mono<Movie> {
-        return synopsisService.requestSynopsis(movie.title)
+        return synopsisService.requestSynopsis(movie.title, movie.releaseDate)
             .map { movie.copy(synopsis = it) }
             .flatMap(simpleMovieRepository::insert)
             .doOnSubscribe { logger.debug("Creating movie") }

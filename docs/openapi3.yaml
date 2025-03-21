@@ -52,26 +52,26 @@ paths:
                 $ref: "#/components/schemas/api-movies1443622531"
               examples:
                 list-partial:
-                  value: "[ {\r\n  \"title\" : \"IBTPe\",\r\n  \"releaseDate\" : \"\
-                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67dc29ac68271577e8b9b6b5\"\
-                    \r\n}, {\r\n  \"title\" : \"QyHzZ\",\r\n  \"releaseDate\" : \"\
-                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67dc29ac68271577e8b9b6c1\"\
-                    \r\n}, {\r\n  \"title\" : \"SNDuy\",\r\n  \"releaseDate\" : \"\
-                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67dc29ac68271577e8b9b6be\"\
-                    \r\n}, {\r\n  \"title\" : \"TlQNb\",\r\n  \"releaseDate\" : \"\
-                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67dc29ac68271577e8b9b6b9\"\
-                    \r\n}, {\r\n  \"title\" : \"WJLer\",\r\n  \"releaseDate\" : \"\
-                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67dc29ac68271577e8b9b6b6\"\
-                    \r\n}, {\r\n  \"title\" : \"aPtGi\",\r\n  \"releaseDate\" : \"\
-                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67dc29ac68271577e8b9b6b7\"\
-                    \r\n}, {\r\n  \"title\" : \"ahMLX\",\r\n  \"releaseDate\" : \"\
-                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67dc29ac68271577e8b9b6bb\"\
-                    \r\n}, {\r\n  \"title\" : \"ariPg\",\r\n  \"releaseDate\" : \"\
-                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67dc29ac68271577e8b9b6bc\"\
-                    \r\n}, {\r\n  \"title\" : \"bMcxg\",\r\n  \"releaseDate\" : \"\
-                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67dc29ac68271577e8b9b6ba\"\
-                    \r\n}, {\r\n  \"title\" : \"czjlY\",\r\n  \"releaseDate\" : \"\
-                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67dc29ac68271577e8b9b6b8\"\
+                  value: "[ {\r\n  \"title\" : \"EwufB\",\r\n  \"releaseDate\" : \"\
+                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67ddadcf1d89ad712de9e101\"\
+                    \r\n}, {\r\n  \"title\" : \"GkAUQ\",\r\n  \"releaseDate\" : \"\
+                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67ddadcf1d89ad712de9e103\"\
+                    \r\n}, {\r\n  \"title\" : \"KWqHu\",\r\n  \"releaseDate\" : \"\
+                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67ddadcf1d89ad712de9e104\"\
+                    \r\n}, {\r\n  \"title\" : \"TbAsb\",\r\n  \"releaseDate\" : \"\
+                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67ddadcf1d89ad712de9e0f8\"\
+                    \r\n}, {\r\n  \"title\" : \"bQxgh\",\r\n  \"releaseDate\" : \"\
+                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67ddadcf1d89ad712de9e0fb\"\
+                    \r\n}, {\r\n  \"title\" : \"bWaEG\",\r\n  \"releaseDate\" : \"\
+                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67ddadcf1d89ad712de9e0ff\"\
+                    \r\n}, {\r\n  \"title\" : \"cAwwm\",\r\n  \"releaseDate\" : \"\
+                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67ddadcf1d89ad712de9e0f7\"\
+                    \r\n}, {\r\n  \"title\" : \"fAbxT\",\r\n  \"releaseDate\" : \"\
+                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67ddadcf1d89ad712de9e0f6\"\
+                    \r\n}, {\r\n  \"title\" : \"fjKYQ\",\r\n  \"releaseDate\" : \"\
+                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67ddadcf1d89ad712de9e102\"\
+                    \r\n}, {\r\n  \"title\" : \"lHJBR\",\r\n  \"releaseDate\" : \"\
+                    1994-10-14\",\r\n  \"type\" : \"Comedy\",\r\n  \"id\" : \"67ddadcf1d89ad712de9e0fa\"\
                     \r\n} ]"
         "401":
           description: "401"
@@ -82,7 +82,7 @@ paths:
       - Movies
       summary: Create a movie
       description: Create a movie
-      operationId: create-conflictcreate-forbiddencreate-release-date-in-futurecreate-unauthorizedmovie-createmovie-create-with-actors
+      operationId: create-conflictcreate-forbiddencreate-no-synopsis-generatedcreate-release-date-in-futurecreate-unauthorizedmovie-createmovie-create-with-actors
       requestBody:
         content:
           application/json:
@@ -95,8 +95,11 @@ paths:
               create-forbidden:
                 value: "{\"title\":\"The Mask\",\"releaseDate\":\"1994-07-29\",\"\
                   type\":\"Comedy\",\"actors\":[]}"
+              create-no-synopsis-generated:
+                value: "{\"title\":\"unknown\",\"releaseDate\":\"1900-07-29\",\"type\"\
+                  :\"Comedy\",\"actors\":[]}"
               create-release-date-in-future:
-                value: "{\"title\":\"The Mask\",\"releaseDate\":\"2025-03-30\",\"\
+                value: "{\"title\":\"The Mask\",\"releaseDate\":\"2025-03-31\",\"\
                   type\":\"Comedy\",\"actors\":[]}"
               create-unauthorized:
                 value: "{\"title\":\"The Mask\",\"releaseDate\":\"1994-07-29\",\"\
@@ -121,6 +124,18 @@ paths:
                     \ defines a movie that already exists.\"\r\n}"
         "403":
           description: "403"
+        "500":
+          description: "500"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/api-movies-id486549215"
+              examples:
+                create-no-synopsis-generated:
+                  value: "{\r\n  \"errorCode\" : \"SUMMARY_NOT_FOUND\",\r\n  \"errorReason\"\
+                    \ : \"No summary found for the requested movie\",\r\n  \"message\"\
+                    \ : \"No summary found for the movie titled 'unknown' released\
+                    \ in 1900.\"\r\n}"
         "400":
           description: "400"
           content:
@@ -129,9 +144,9 @@ paths:
                 $ref: "#/components/schemas/api-movies-id486549215"
               examples:
                 create-release-date-in-future:
-                  value: "{\r\n  \"timestamp\" : \"2025-03-20T14:43:57.221+00:00\"\
+                  value: "{\r\n  \"timestamp\" : \"2025-03-21T18:19:59.464+00:00\"\
                     ,\r\n  \"path\" : \"/api/movies\",\r\n  \"status\" : 400,\r\n\
-                    \  \"error\" : \"Bad Request\",\r\n  \"requestId\" : \"69a35ccd\"\
+                    \  \"error\" : \"Bad Request\",\r\n  \"requestId\" : \"f3d5816\"\
                     \r\n}"
         "401":
           description: "401"
@@ -148,7 +163,7 @@ paths:
                     \ : [ ],\r\n  \"synopsis\" : \"\\\"The Dark Knight\\\" explores\
                     \ themes of chaos, morality, and the limits of heroism as Batman\
                     \ confronts the Joker, a nihilistic criminal who tests the ethical\
-                    \ boundaries of Gotham City.\",\r\n  \"id\" : \"67dc29ac68271577e8b9b6b3\"\
+                    \ boundaries of Gotham City.\",\r\n  \"id\" : \"67ddadce1d89ad712de9e0f4\"\
                     \r\n}"
                 movie-create-with-actors:
                   value: "{\r\n  \"title\" : \"The Mask\",\r\n  \"releaseDate\" :\
@@ -156,7 +171,7 @@ paths:
                     \ : [ ],\r\n  \"synopsis\" : \"\\\"The Dark Knight\\\" explores\
                     \ themes of chaos, morality, and the limits of heroism as Batman\
                     \ confronts the Joker, a nihilistic criminal who tests the ethical\
-                    \ boundaries of Gotham City.\",\r\n  \"id\" : \"67dc29ad68271577e8b9b6c5\"\
+                    \ boundaries of Gotham City.\",\r\n  \"id\" : \"67ddadcf1d89ad712de9e107\"\
                     \r\n}"
       security:
       - bearerAuthJWT: []
@@ -185,7 +200,7 @@ paths:
                 find-does-no-exist:
                   value: "{\r\n  \"errorCode\" : \"MOVIE_NOT_FOUND\",\r\n  \"errorReason\"\
                     \ : \"Movie is not registered\",\r\n  \"message\" : \"The movie\
-                    \ with id 67dc29ad68271577e8b9b6c3 was not found.\"\r\n}"
+                    \ with id 67ddadcf1d89ad712de9e105 was not found.\"\r\n}"
         "401":
           description: "401"
         "200":

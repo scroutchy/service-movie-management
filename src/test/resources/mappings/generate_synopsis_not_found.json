@@ -1,0 +1,46 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/chat/completions",
+    "headers": {
+      "Authorization": {
+        "matches": "Bearer .*"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$.messages[?(@.content=='Provide me with a short summary in one sentence of synopsis of movie unknown that was released in 1900')]"
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "3ead2e26ca6a4b83a53df0c4131f1f19",
+      "object": "chat.completion",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "tool_calls": null,
+            "content": "No summary found."
+          },
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 33,
+        "total_tokens": 79,
+        "completion_tokens": 46
+      }
+    },
+    "transformers": [
+      "response-template"
+    ]
+  }
+}

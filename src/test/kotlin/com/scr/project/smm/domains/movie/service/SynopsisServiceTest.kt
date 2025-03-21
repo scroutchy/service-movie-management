@@ -1,6 +1,8 @@
 package com.scr.project.smm.domains.movie.service
 
 import com.scr.project.smm.domains.movie.client.MistralClient
+import com.scr.project.smm.domains.movie.config.MovieConstants.NO_SUMMARY_FOUND
+import com.scr.project.smm.domains.movie.error.MovieErrors.OnSummaryNotFound
 import com.scr.project.smm.entrypoint.model.api.retrofit.mistral.input.MistralInputApiDto
 import com.scr.project.smm.entrypoint.model.api.retrofit.mistral.output.ChoiceApiDto
 import com.scr.project.smm.entrypoint.model.api.retrofit.mistral.output.MessageOutputApiDto
@@ -19,6 +21,7 @@ import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import reactor.kotlin.test.test
 import retrofit2.Response
+import java.time.LocalDate
 
 class SynopsisServiceTest {
 
@@ -36,7 +39,7 @@ class SynopsisServiceTest {
         every { synopsisClient.request(any<MistralInputApiDto>()) } answers {
             Response.success(MistralOutputApiDto(listOf(ChoiceApiDto(MessageOutputApiDto(synopsis))))).toMono()
         }
-        synopsisService.requestSynopsis("title")
+        synopsisService.requestSynopsis("title", LocalDate.of(2023, 1, 1))
             .test()
             .expectSubscription()
             .consumeNextWith {
@@ -52,7 +55,7 @@ class SynopsisServiceTest {
         every { synopsisClient.request(any<MistralInputApiDto>()) } answers {
             Response.error<MistralOutputApiDto>(400, "Bad Request".toResponseBody()).toMono()
         }
-        synopsisService.requestSynopsis("title")
+        synopsisService.requestSynopsis("title", LocalDate.of(2023, 1, 1))
             .test()
             .expectSubscription()
             .expectErrorMatches { it is RuntimeException }
@@ -66,7 +69,7 @@ class SynopsisServiceTest {
         every { synopsisClient.request(any<MistralInputApiDto>()) } answers {
             Mono.error(IOException("Network issue"))
         }
-        synopsisService.requestSynopsis("title")
+        synopsisService.requestSynopsis("title", LocalDate.of(2023, 1, 1))
             .test()
             .expectSubscription()
             .expectErrorMatches { it is RuntimeException && it.cause is IOException }
@@ -80,10 +83,24 @@ class SynopsisServiceTest {
         every { synopsisClient.request(any<MistralInputApiDto>()) } answers {
             Response.success(MistralOutputApiDto(emptyList())).toMono()
         }
-        synopsisService.requestSynopsis("title")
+        synopsisService.requestSynopsis("title", LocalDate.of(2023, 1, 1))
             .test()
             .expectSubscription()
             .expectErrorMatches { it is RuntimeException }
+            .verify()
+        verify(exactly = 1) { synopsisClient.request(any<MistralInputApiDto>()) }
+        confirmVerified(synopsisClient)
+    }
+
+    @Test
+    fun `requestSynopsis should handle summary not found`() {
+        every { synopsisClient.request(any<MistralInputApiDto>()) } answers {
+            Response.success(MistralOutputApiDto(listOf(ChoiceApiDto(MessageOutputApiDto(NO_SUMMARY_FOUND))))).toMono()
+        }
+        synopsisService.requestSynopsis("title", LocalDate.of(2023, 1, 1))
+            .test()
+            .expectSubscription()
+            .expectErrorMatches { it is RuntimeException && it.cause is OnSummaryNotFound }
             .verify()
         verify(exactly = 1) { synopsisClient.request(any<MistralInputApiDto>()) }
         confirmVerified(synopsisClient)
