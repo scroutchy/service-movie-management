@@ -42,7 +42,7 @@ class MovieServiceTest {
     @Test
     fun `create should succeed`() {
         every { simpleMovieRepository.insert(any<Movie>()) } answers { firstArg<Movie>().copy(id = ObjectId.get()).toMono() }
-        every { synopsisService.requestSynopsis(any<String>()) } answers { "This is the AI-generated synopsis".toMono() }
+        every { synopsisService.requestSynopsis(any<String>(), any<LocalDate>()) } answers { "This is the AI-generated synopsis".toMono() }
         movieService.create(movieWithoutId)
             .test()
             .expectSubscription()
@@ -54,7 +54,7 @@ class MovieServiceTest {
                 assertThat(it.synopsis).isEqualTo("This is the AI-generated synopsis")
             }.verifyComplete()
         verify(exactly = 1) { simpleMovieRepository.insert(any<Movie>()) }
-        verify(exactly = 1) { synopsisService.requestSynopsis(movieWithoutId.title) }
+        verify(exactly = 1) { synopsisService.requestSynopsis(movieWithoutId.title, movieWithoutId.releaseDate) }
         confirmVerified(simpleMovieRepository, synopsisService)
     }
 

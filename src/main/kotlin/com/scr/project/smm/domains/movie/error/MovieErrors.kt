@@ -2,8 +2,10 @@ package com.scr.project.smm.domains.movie.error
 
 import com.scr.project.smm.domains.movie.error.MovieErrorReasonCode.ACTOR_NOT_FOUND
 import com.scr.project.smm.domains.movie.error.MovieErrorReasonCode.MOVIE_NOT_FOUND
+import com.scr.project.smm.domains.movie.error.MovieErrorReasonCode.SUMMARY_NOT_FOUND
 import org.bson.types.ObjectId
 import org.springframework.http.HttpStatus.BAD_REQUEST
+import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.web.bind.annotation.ResponseStatus
 
@@ -19,5 +21,11 @@ sealed class MovieErrors : RuntimeException() {
     class OnActorNotFound(val id: String) : MovieErrors() {
 
         override val message = ACTOR_NOT_FOUND.wording
+    }
+
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    class OnSummaryNotFound(val title: String, val year: Int) : MovieErrors() {
+
+        override val message = SUMMARY_NOT_FOUND.wording
     }
 }
