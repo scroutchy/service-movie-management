@@ -1,7 +1,7 @@
 plugins {
 	kotlin("jvm") version "1.9.25"
 	kotlin("plugin.spring") version "1.9.25"
-	id("org.springframework.boot") version "3.4.3"
+    id("org.springframework.boot") version "3.4.4"
 	id("io.spring.dependency-management") version "1.1.7"
     id("org.sonarqube") version "6.0.1.5171"
     id("jacoco")
@@ -12,7 +12,7 @@ group = "com.scr.project"
 version = "0.0.1-SNAPSHOT"
 private val jakartaValidationVersion = "3.0.2"
 private val mockkVersion = "1.12.0"
-private val commonsCinemaVersion = "2.1.1"
+private val commonsCinemaVersion = "2.1.2"
 private val retrofitVersion = "2.11.0"
 private val converterJacksonVersion = "2.11.0"
 private val reactorAdapterVersion = "2.1.0"
