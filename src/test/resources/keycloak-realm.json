@@ -1,0 +1,77 @@
+{
+  "realm": "keycloak-realm",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "cinema_write",
+        "description": "Role for writing cinema data"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "my-client",
+      "bearerOnly": false,
+      "protocol": "openid-connect",
+      "redirectUris": [
+        "/*"
+      ],
+      "publicClient": false,
+      "secret": "my-secret",
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true
+    }
+  ],
+  "users": [
+    {
+      "username": "testuser",
+      "enabled": true,
+      "email": "testuser@test.com",
+      "emailVerified": true,
+      "firstName": "Test",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "testpass"
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "writeuser",
+      "enabled": true,
+      "email": "writeuser@test.com",
+      "emailVerified": true,
+      "firstName": "Write",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "writepass"
+        }
+      ],
+      "requiredActions": [],
+      "realmRoles": [
+        "cinema_write"
+      ]
+    },
+    {
+      "id": "4e34a6bb-2279-41fc-aefc-53facc4f2edf",
+      "username": "service-account-my-client",
+      "emailVerified": false,
+      "createdTimestamp": 1743087583003,
+      "enabled": true,
+      "totp": false,
+      "serviceAccountClientId": "my-client",
+      "disableableCredentialTypes": [],
+      "requiredActions": [],
+      "realmRoles": [
+        "default-roles-keycloak-realm"
+      ],
+      "notBefore": 0,
+      "groups": []
+    }
+  ]
+}

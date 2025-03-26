@@ -17,8 +17,7 @@ private val retrofitVersion = "2.11.0"
 private val converterJacksonVersion = "2.11.0"
 private val reactorAdapterVersion = "2.1.0"
 private val loggingInterceptorVersion = "4.11.0"
-private val javaJwtVersion = "4.5.0"
-private val jsonWebTokenVersion = "0.11.5"
+private val testcontainersKeycloackVersion = "3.6.0"
 
 java {
 	toolchain {
@@ -53,10 +52,6 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:$loggingInterceptorVersion")
     implementation("com.jakewharton.retrofit:retrofit2-reactor-adapter:$reactorAdapterVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("com.auth0:java-jwt:$javaJwtVersion")
-    implementation("io.jsonwebtoken:jjwt-api:$jsonWebTokenVersion")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:$jsonWebTokenVersion")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jsonWebTokenVersion")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("io.mockk:mockk:$mockkVersion")
@@ -64,6 +59,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:mongodb")
+    testImplementation("com.github.dasniko:testcontainers-keycloak:$testcontainersKeycloackVersion")
     testImplementation("com.scr.project.commons.cinema.test:commons-cinema-test:$commonsCinemaVersion")
     testImplementation("org.springframework.cloud:spring-cloud-contract-wiremock")
     testImplementation("org.springframework.restdocs:spring-restdocs-webtestclient")

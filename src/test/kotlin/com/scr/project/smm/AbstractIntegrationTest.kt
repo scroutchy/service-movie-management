@@ -1,5 +1,6 @@
 package com.scr.project.smm
 
+import dasniko.testcontainers.keycloak.KeycloakContainer
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
@@ -19,11 +20,19 @@ abstract class AbstractIntegrationTest {
     companion object {
 
         val mongoDBContainer = MongoDBContainer("mongo:6.0").apply { start() }
+        val keycloakContainer = KeycloakContainer().apply {
+            withAdminUsername("admin")
+            withAdminPassword("kawabunga")
+            withRealmImportFile("keycloak-realm.json")
+            start()
+        }
 
         @JvmStatic
         @DynamicPropertySource
         fun mongoProperties(registry: DynamicPropertyRegistry) {
             registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl)
+            registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri") { "${keycloakContainer.authServerUrl}/realms/keycloak-realm" }
+            registry.add("keycloak.auth-server-url", keycloakContainer::getAuthServerUrl)
         }
     }
 }
