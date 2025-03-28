@@ -6,6 +6,7 @@ import com.scr.project.smm.domains.movie.model.entity.Movie
 import com.scr.project.smm.domains.movie.model.entity.MovieType.Fantasy
 import com.scr.project.smm.domains.movie.repository.MovieRepository
 import com.scr.project.smm.domains.movie.repository.SimpleMovieRepository
+import com.scr.project.smm.domains.security.service.KeycloakService
 import io.mockk.clearMocks
 import io.mockk.confirmVerified
 import io.mockk.every
@@ -32,7 +33,8 @@ class MovieServiceTest {
     private val movieRepository = mockk<MovieRepository>()
     private val actorService = mockk<ActorService>()
     private val synopsisService = mockk<SynopsisService>()
-    private val movieService = MovieService(simpleMovieRepository, movieRepository, actorService, synopsisService)
+    private val keycloakService = mockk<KeycloakService>()
+    private val movieService = MovieService(simpleMovieRepository, movieRepository, actorService, synopsisService, keycloakService)
 
     @BeforeEach
     internal fun setUp() {
@@ -80,7 +82,8 @@ class MovieServiceTest {
     fun `findById should succeed and retrieve actors when provided in movie`() {
         val actorId = ObjectId.get().toHexString()
         every { simpleMovieRepository.findById(movie.id!!.toHexString()) } answers { movie.copy(actors = listOf(actorId)).toMono() }
-        every { actorService.findById(actorId) } answers { Actor(actorId, "Brad Pitt").toMono() }
+        every { actorService.findById(actorId, any()) } answers { Actor(actorId, "Brad Pitt").toMono() }
+        every { keycloakService.getToken() } answers { "token".toMono() }
         movieService.findById(movie.id!!)
             .test()
             .expectSubscription()
@@ -94,7 +97,7 @@ class MovieServiceTest {
                 assertThat(it.actors.single()).isEqualTo(Actor(actorId, "Brad Pitt"))
             }.verifyComplete()
         verify(exactly = 1) { simpleMovieRepository.findById(movie.id!!.toHexString()) }
-        verify(exactly = 1) { actorService.findById(any()) }
+        verify(exactly = 1) { actorService.findById(any(), "Bearer token") }
         confirmVerified(simpleMovieRepository, actorService)
     }
 

@@ -18,8 +18,8 @@ class ActorService(private val actorClient: ActorClient) {
 
     private val logger: Logger = LoggerFactory.getLogger(ActorService::class.java)
 
-    fun findById(id: String): Mono<Actor> {
-        return actorClient.findById(ObjectId(id))
+    fun findById(id: String, token: String): Mono<Actor> {
+        return actorClient.findById(ObjectId(id), token)
             .doOnSubscribe { logger.debug("Retrieving actor data for actor $id") }
             .doOnNext { logger.debug("Retrieved actor data for actor $id") }
             .onErrorMap {

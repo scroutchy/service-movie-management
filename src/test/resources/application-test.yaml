@@ -5,14 +5,12 @@ spring:
 actor:
   service:
     url: http://localhost:${wiremock.server.port}
-  api:
-    jwt:
-      secretKey: dummySecretKeyForTestingPurposeOnly
 mistral:
   service:
     url: http://localhost:${wiremock.server.port}
   api:
     token: dummy
-security:
-  jwt:
-    secretKey: dummySecretKeyForTestingPurposeOnly
+keycloak:
+  realm: keycloak-realm
+  client-id: my-client
+  client-secret: my-secret

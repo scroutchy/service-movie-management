@@ -1,17 +1,21 @@
 spring:
   application:
     name: service-movie-management
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak.keycloak.svc.cluster.local/realms/cinema
 actor:
   service:
     url: http://actor-management-springboot-app.default.svc.cluster.local:8080/
-  api:
-    jwt:
-      secretKey: ${JWT_SECRET_KEY}
 mistral:
   service:
     url: ${MISTRAL_SERVICE_URL}
   api:
     token: ${MISTRAL_API_TOKEN}
-security:
-  jwt:
-    secretKey: ${JWT_SECRET_KEY_SMM}
+keycloak:
+  auth-server-url: http://keycloak.keycloak.svc.cluster.local/
+  realm: cinema
+  client-id: client-internal-app
+  client-secret: ${KEYCLOAK_CLIENT_SECRET}

@@ -7,6 +7,7 @@ import com.scr.project.smm.domains.movie.ports.MoviePort
 import com.scr.project.smm.domains.movie.ports.MovieWithActors
 import com.scr.project.smm.domains.movie.repository.MovieRepository
 import com.scr.project.smm.domains.movie.repository.SimpleMovieRepository
+import com.scr.project.smm.domains.security.service.KeycloakService
 import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -23,7 +24,8 @@ class MovieService(
     private val simpleMovieRepository: SimpleMovieRepository,
     private val movieRepository: MovieRepository,
     private val actorService: ActorService,
-    private val synopsisService: SynopsisService
+    private val synopsisService: SynopsisService,
+    private val keycloakService: KeycloakService,
 ) : MoviePort {
 
     private val logger: Logger = LoggerFactory.getLogger(MovieService::class.java)
@@ -54,6 +56,8 @@ class MovieService(
     }
 
     private fun findActors(actorIds: List<String>): Flux<Actor> {
-        return actorIds.toFlux().concatMap { actorService.findById(it) }
+        return actorIds.toFlux().concatMap { keycloakService.getToken().map(::toBearerToken).flatMap { t -> actorService.findById(it, t) } }
     }
+
+    private fun toBearerToken(token: String) = "Bearer $token"
 }
