@@ -10,6 +10,7 @@ spring:
     security-protocol: PLAINTEXT
     sasl:
       mechanism:
+      username: dummyUsername
       password: dummyPassword
 actor:
   service:

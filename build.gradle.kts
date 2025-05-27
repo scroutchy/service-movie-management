@@ -60,6 +60,7 @@ dependencies {
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("jakarta.validation:jakarta.validation-api:$jakartaValidationVersion")
     implementation("com.scr.project.commons.cinema:commons-cinema:$commonsCinemaVersion")
+    implementation("com.scr.project.commons.cinema:commons-cinema-kafka:${commonsCinemaVersion}")
     implementation("com.scr.project.commons.cinema:commons-cinema-outbox:${commonsCinemaVersion}")
     implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
     implementation("com.squareup.retrofit2:converter-jackson:$converterJacksonVersion")
