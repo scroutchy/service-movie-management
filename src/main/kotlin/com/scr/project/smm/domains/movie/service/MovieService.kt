@@ -1,6 +1,7 @@
 package com.scr.project.smm.domains.movie.service
 
 import com.scr.project.smm.domains.movie.error.MovieErrors.OnMovieNotFound
+import com.scr.project.smm.domains.movie.messaging.v1.RewardedMessagingV1
 import com.scr.project.smm.domains.movie.model.business.Actor
 import com.scr.project.smm.domains.movie.model.entity.Movie
 import com.scr.project.smm.domains.movie.ports.MoviePort
@@ -13,6 +14,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
@@ -26,14 +28,17 @@ class MovieService(
     private val actorService: ActorService,
     private val synopsisService: SynopsisService,
     private val keycloakService: KeycloakService,
+    private val movieMessagingV1: RewardedMessagingV1,
 ) : MoviePort {
 
     private val logger: Logger = LoggerFactory.getLogger(MovieService::class.java)
 
+    @Transactional
     override fun create(movie: Movie): Mono<Movie> {
         return synopsisService.requestSynopsis(movie.title, movie.releaseDate)
             .map { movie.copy(synopsis = it) }
             .flatMap(simpleMovieRepository::insert)
+            .flatMap(movieMessagingV1::notify)
             .doOnSubscribe { logger.debug("Creating movie") }
             .doOnSuccess { logger.info("Creation of movie with id ${it.id} was successful.") }
             .doOnError { logger.warn("Creation of movie failed.") }

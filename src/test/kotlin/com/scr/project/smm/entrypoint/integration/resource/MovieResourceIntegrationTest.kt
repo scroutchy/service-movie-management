@@ -4,7 +4,10 @@ import com.epages.restdocs.apispec.ResourceDocumentation.parameterWithName
 import com.epages.restdocs.apispec.ResourceDocumentation.resource
 import com.epages.restdocs.apispec.ResourceSnippetParameters
 import com.epages.restdocs.apispec.WebTestClientRestDocumentationWrapper
+import com.scr.project.commons.cinema.test.awaitUntil
 import com.scr.project.smm.AbstractIntegrationTest
+import com.scr.project.smm.RewardedKafkaTestConsumer
+import com.scr.project.smm.TestKafkaConfig
 import com.scr.project.smm.domains.movie.dao.MovieDao
 import com.scr.project.smm.domains.movie.dao.pulpFiction
 import com.scr.project.smm.domains.movie.error.MovieExceptionHandler.ErrorResponse
@@ -16,6 +19,7 @@ import com.scr.project.smm.entrypoint.model.api.MovieApiDto
 import com.scr.project.smm.entrypoint.resource.ApiConstants.DEFAULT_PAGE_SIZE
 import com.scr.project.smm.entrypoint.resource.ApiConstants.ID_PATH
 import com.scr.project.smm.entrypoint.resource.ApiConstants.MOVIE_PATH
+import com.scr.project.srm.RewardedEntityTypeKafkaDto.MOVIE
 import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.BeforeEach
@@ -26,6 +30,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.context.annotation.Import
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpHeaders.CONTENT_RANGE
 import org.springframework.http.HttpStatus.CONFLICT
@@ -42,10 +47,12 @@ import java.time.LocalDate
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @AutoConfigureWebTestClient
 @AutoConfigureRestDocs
+@Import(TestKafkaConfig::class)
 internal class MovieResourceIntegrationTest(
     @Autowired private val webTestClient: WebTestClient,
     @Autowired private val movieDao: MovieDao,
     @Autowired private val restDocumentation: RestDocumentationContextProvider,
+    @Autowired private val kafkaRewardedConsumer: RewardedKafkaTestConsumer,
 ) : AbstractIntegrationTest() {
 
     @LocalServerPort
@@ -139,6 +146,14 @@ internal class MovieResourceIntegrationTest(
                     assertThat(title).isEqualTo(body.title)
                     assertThat(releaseDate).isEqualTo(body.releaseDate)
                     assertThat(type).isEqualTo(body.type)
+                }
+                awaitUntil {
+                    val messages = kafkaRewardedConsumer.poll()
+                    assertThat(messages).hasSize(1)
+                    with(messages.first()) {
+                        assertThat(id).isEqualTo(body.id)
+                        assertThat(type).isEqualTo(MOVIE)
+                    }
                 }
             }
     }

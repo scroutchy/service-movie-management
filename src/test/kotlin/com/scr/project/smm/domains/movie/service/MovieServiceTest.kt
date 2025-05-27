@@ -1,6 +1,7 @@
 package com.scr.project.smm.domains.movie.service
 
 import com.scr.project.smm.domains.movie.error.MovieErrors.OnMovieNotFound
+import com.scr.project.smm.domains.movie.messaging.v1.RewardedMessagingV1
 import com.scr.project.smm.domains.movie.model.business.Actor
 import com.scr.project.smm.domains.movie.model.entity.Movie
 import com.scr.project.smm.domains.movie.model.entity.MovieType.Fantasy
@@ -34,17 +35,20 @@ class MovieServiceTest {
     private val actorService = mockk<ActorService>()
     private val synopsisService = mockk<SynopsisService>()
     private val keycloakService = mockk<KeycloakService>()
-    private val movieService = MovieService(simpleMovieRepository, movieRepository, actorService, synopsisService, keycloakService)
+    private val movieMessagingV1 = mockk<RewardedMessagingV1>()
+    private val movieService =
+        MovieService(simpleMovieRepository, movieRepository, actorService, synopsisService, keycloakService, movieMessagingV1)
 
     @BeforeEach
     internal fun setUp() {
-        clearMocks(simpleMovieRepository, movieRepository, actorService, synopsisService)
+        clearMocks(simpleMovieRepository, movieRepository, actorService, synopsisService, movieMessagingV1)
     }
 
     @Test
     fun `create should succeed`() {
         every { simpleMovieRepository.insert(any<Movie>()) } answers { firstArg<Movie>().copy(id = ObjectId.get()).toMono() }
         every { synopsisService.requestSynopsis(any<String>(), any<LocalDate>()) } answers { "This is the AI-generated synopsis".toMono() }
+        every { movieMessagingV1.notify(any<Movie>()) } answers { firstArg<Movie>().toMono() }
         movieService.create(movieWithoutId)
             .test()
             .expectSubscription()
@@ -57,7 +61,8 @@ class MovieServiceTest {
             }.verifyComplete()
         verify(exactly = 1) { simpleMovieRepository.insert(any<Movie>()) }
         verify(exactly = 1) { synopsisService.requestSynopsis(movieWithoutId.title, movieWithoutId.releaseDate) }
-        confirmVerified(simpleMovieRepository, synopsisService)
+        verify(exactly = 1) { movieMessagingV1.notify(any<Movie>()) }
+        confirmVerified(simpleMovieRepository, synopsisService, movieMessagingV1)
     }
 
     @Test
