@@ -15,7 +15,7 @@ class MovieMongoIndexConfiguration(mongoTemplate: ReactiveMongoTemplate) {
 
     private fun movieIndexes(mongoTemplate: ReactiveMongoTemplate) {
         mongoTemplate.indexOps(Movie::class.java)
-            .ensureIndex(
+            .createIndex(
                 Index().on(Movie::title.name, ASC)
                     .unique()
             ).subscribe()

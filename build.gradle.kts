@@ -1,7 +1,7 @@
 plugins {
     kotlin("jvm") version "2.1.20"
     kotlin("plugin.spring") version "2.1.20"
-    id("org.springframework.boot") version "3.4.5"
+    id("org.springframework.boot") version "3.5.0"
 	id("io.spring.dependency-management") version "1.1.7"
     id("org.sonarqube") version "6.0.1.5171"
     id("jacoco")
@@ -10,14 +10,14 @@ plugins {
 
 group = "com.scr.project"
 version = "0.0.1-SNAPSHOT"
-private val jakartaValidationVersion = "3.0.2"
-private val mockkVersion = "1.12.0"
-private val commonsCinemaVersion = "2.1.4"
-private val retrofitVersion = "2.11.0"
-private val converterJacksonVersion = "2.11.0"
-private val reactorAdapterVersion = "2.1.0"
-private val loggingInterceptorVersion = "4.11.0"
-private val testcontainersKeycloackVersion = "3.6.0"
+private val jakartaValidationVersion: String by project
+private val mockkVersion: String by project
+private val commonsCinemaVersion: String by project
+private val retrofitVersion: String by project
+private val converterJacksonVersion: String by project
+private val reactorAdapterVersion: String by project
+private val loggingInterceptorVersion: String by project
+private val testcontainersKeycloackVersion: String by project
 
 java {
 	toolchain {
