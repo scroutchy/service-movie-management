@@ -75,6 +75,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:mongodb")
+    testImplementation("org.testcontainers:kafka")
     testImplementation("com.github.dasniko:testcontainers-keycloak:$testcontainersKeycloackVersion")
     testImplementation("com.scr.project.commons.cinema.test:commons-cinema-test:$commonsCinemaVersion")
     testImplementation("org.springframework.cloud:spring-cloud-contract-wiremock")

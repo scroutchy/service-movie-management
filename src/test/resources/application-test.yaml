@@ -2,6 +2,15 @@ spring:
   data:
     mongodb:
       uri: mongodb://localhost:27017/test
+  kafka:
+    bootstrap-servers: kafka:9092
+    schema:
+      registry:
+        url: http://schema-registry:8081
+    security-protocol: PLAINTEXT
+    sasl:
+      mechanism:
+      password: dummyPassword
 actor:
   service:
     url: http://localhost:${wiremock.server.port}
