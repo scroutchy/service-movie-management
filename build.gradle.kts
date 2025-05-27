@@ -1,3 +1,5 @@
+import com.github.davidmc24.gradle.plugin.avro.GenerateAvroJavaTask
+
 plugins {
     kotlin("jvm") version "2.1.20"
     kotlin("plugin.spring") version "2.1.20"
@@ -6,6 +8,7 @@ plugins {
     id("org.sonarqube") version "6.0.1.5171"
     id("jacoco")
     id("com.epages.restdocs-api-spec") version "0.19.4"
+    id("com.github.davidmc24.gradle.plugin.avro") version "1.9.1"
 }
 
 group = "com.scr.project"
@@ -28,12 +31,18 @@ java {
 repositories {
 	mavenCentral()
     maven("https://gitlab.com/api/v4/projects/67204824/packages/maven")
+    maven("https://gitlab.com/api/v4/projects/69406479/packages/maven")
+    maven("https://packages.confluent.io/maven/")
 }
 
 dependencyManagement {
     imports {
         mavenBom("org.springframework.cloud:spring-cloud-dependencies:2024.0.0")
     }
+}
+
+configurations {
+    create("avroSchemas")
 }
 
 dependencies {
@@ -44,14 +53,22 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+    implementation("org.springframework.kafka:spring-kafka")
+    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
+    implementation("io.projectreactor.kafka:reactor-kafka")
+    implementation("org.apache.avro:avro:1.12.0")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("jakarta.validation:jakarta.validation-api:$jakartaValidationVersion")
     implementation("com.scr.project.commons.cinema:commons-cinema:$commonsCinemaVersion")
+    implementation("com.scr.project.commons.cinema:commons-cinema-kafka:${commonsCinemaVersion}")
+    implementation("com.scr.project.commons.cinema:commons-cinema-outbox:${commonsCinemaVersion}")
     implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
     implementation("com.squareup.retrofit2:converter-jackson:$converterJacksonVersion")
     implementation("com.squareup.okhttp3:logging-interceptor:$loggingInterceptorVersion")
     implementation("com.jakewharton.retrofit:retrofit2-reactor-adapter:$reactorAdapterVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("io.confluent:kafka-avro-serializer:7.9.0")
+    add("avroSchemas", "org.scr.project:service-rewarded-management:0.1.1:schemas")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("io.mockk:mockk:$mockkVersion")
@@ -59,6 +76,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:mongodb")
+    testImplementation("org.testcontainers:kafka")
     testImplementation("com.github.dasniko:testcontainers-keycloak:$testcontainersKeycloackVersion")
     testImplementation("com.scr.project.commons.cinema.test:commons-cinema-test:$commonsCinemaVersion")
     testImplementation("org.springframework.cloud:spring-cloud-contract-wiremock")
@@ -144,4 +162,14 @@ afterEvaluate {
         from("build/api-spec")
         into("docs")
     })
+}
+val extractAvroSchemas by tasks.registering(Copy::class) {
+    from(configurations["avroSchemas"].map { zipTree(it) })
+    include("**/*.avsc")
+    into(layout.buildDirectory.dir("schemas-libs"))
+}
+
+tasks.named<GenerateAvroJavaTask>("generateAvroJava") {
+    dependsOn(extractAvroSchemas)
+    source(layout.buildDirectory.dir("schemas-libs"))
 }
