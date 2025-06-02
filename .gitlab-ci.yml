@@ -120,13 +120,13 @@ trivy_scan_vulnerabilities:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$REGISTRY"
   script:
     - docker pull "${IMAGE_FULL}"
-    - trivy image --scanners vuln  "${IMAGE_FULL}" --output REPORT_FILE  --no-progress --format sarif
+    - trivy image --scanners vuln  "${IMAGE_FULL}" --output $REPORT_FILE  --no-progress --format template --template "@contrib/gitlab.tpl" --exit-code 1
     - ls -lah .
   artifacts:
     reports:
-      sast: REPORT_FILE
+      container_scanning: $REPORT_FILE
     paths:
-      - REPORT_FILE
+      - $REPORT_FILE
     expire_in: 7 days
   allow_failure: true
 
