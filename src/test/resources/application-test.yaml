@@ -3,6 +3,7 @@ spring:
     mongodb:
       uri: mongodb://localhost:27017/test
   kafka:
+    enabled: true
     bootstrap-servers: kafka:9092
     schema:
       registry:

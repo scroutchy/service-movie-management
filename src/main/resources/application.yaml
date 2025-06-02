@@ -7,6 +7,7 @@ spring:
         jwt:
           issuer-uri: http://keycloak.keycloak.svc.cluster.local/realms/cinema
   kafka:
+    enabled: ${SPRING_KAFKA_ENABLED:false}
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     schema:
       registry:

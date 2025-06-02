@@ -57,7 +57,6 @@ dependencies {
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("io.projectreactor.kafka:reactor-kafka")
     implementation("org.apache.avro:avro:1.12.0")
-    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("jakarta.validation:jakarta.validation-api:$jakartaValidationVersion")
     implementation("com.scr.project.commons.cinema:commons-cinema:$commonsCinemaVersion")
     implementation("com.scr.project.commons.cinema:commons-cinema-kafka:${commonsCinemaVersion}")

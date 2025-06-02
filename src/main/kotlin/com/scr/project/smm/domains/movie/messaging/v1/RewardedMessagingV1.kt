@@ -1,7 +1,7 @@
 package com.scr.project.smm.domains.movie.messaging.v1
 
 import com.scr.project.commons.cinema.outbox.model.entity.Outbox
-import com.scr.project.commons.cinema.outbox.service.OutboxService
+import com.scr.project.commons.cinema.outbox.service.IOutboxService
 import com.scr.project.smm.config.TopicProperties
 import com.scr.project.smm.domains.movie.mapper.toHexString
 import com.scr.project.smm.domains.movie.mapper.toRewardedKafkaDto
@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono
 
 @Service
 @EnableConfigurationProperties(TopicProperties::class)
-class RewardedMessagingV1(private val producer: OutboxService, private val topicProperties: TopicProperties) {
+class RewardedMessagingV1(private val producer: IOutboxService, private val topicProperties: TopicProperties) {
 
     private val logger = LoggerFactory.getLogger(RewardedMessagingV1::class.java)
 
@@ -27,8 +27,8 @@ class RewardedMessagingV1(private val producer: OutboxService, private val topic
                 topicProperties.movieCreationNotification
             )
         ).thenReturn(movie)
-            .doOnSubscribe { logger.debug("Sending movie creation notification for movie with id ${movie.id}") }
-            .doOnSuccess { logger.info("Sent movie creation notification for movie with id ${movie.id}") }
-            .doOnError { logger.warn("Failed to send movie creation notification for movie with id ${movie.id}") }
+            .doOnSubscribe { logger.debug("Handling process of movie creation notification for movie with id ${movie.id}") }
+            .doOnSuccess { logger.info("Notification creation process if any was successfully handled for movie with id ${movie.id}") }
+            .doOnError { logger.warn("Failed to handle the process of movie creation notification for movie with id ${movie.id}") }
     }
 }

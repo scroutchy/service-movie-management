@@ -4,3 +4,4 @@ metadata:
   name: service-movie-management-configmap
 data:
   MISTRAL_SERVICE_URL: https://api.mistral.ai/v1/
+  SPRING_KAFKA_ENABLED: "true"

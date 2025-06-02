@@ -72,7 +72,7 @@ internal class MovieResourceIntegrationTest(
     }
 
     @Test
-    fun `create should succeed and create a movie in database`() {
+    fun `create should succeed and create a movie in database and send kafka notification`() {
         val movieRequest = MovieApiDto("The Mask", LocalDate.of(1994, 7, 29), Comedy)
         val initialCount = movieDao.count()
         webTestClient.mutate().baseUrl("http://localhost:$port")
