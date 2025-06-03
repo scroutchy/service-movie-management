@@ -128,7 +128,7 @@ trivy_scan_vulnerabilities:
     - ls -lah .
   artifacts:
     reports:
-      container_scanning: $REPORT_FILE
+      dependency_scanning: $REPORT_FILE
     paths:
       - $REPORT_FILE
     expire_in: 7 days
