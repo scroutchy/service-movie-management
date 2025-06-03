@@ -5,7 +5,7 @@ import com.scr.project.commons.cinema.model.api.DTO
 
 data class MistralInputApiDto(
     val messages: List<MessageInputApiDto>,
-    val model: String = "mistral-large-latest",
+    val model: String = "mistral-medium-latest",
     @JsonProperty("max_tokens")
     val maxTokens: Int = 128
 ) : DTO
