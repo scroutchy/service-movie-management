@@ -122,8 +122,9 @@ trivy_scan_vulnerabilities:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$REGISTRY"
   script:
     - docker pull "${IMAGE_FULL}"
+    - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v${TRIVY_VERSION}
     - curl -sSL -o /tmp/trivy-gitlab.tpl https://github.com/aquasecurity/trivy/raw/v${TRIVY_VERSION}/contrib/gitlab.tpl
-    - ls -lah .
+    - trivy registry login --username "$CI_REGISTRY_USER" --password "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
     - trivy image --scanners vuln  "${IMAGE_FULL}" --no-progress --format template --template "@/tmp/trivy-gitlab.tpl" --output $REPORT_FILE --exit-code 1 --debug
     - ls -lah .
   artifacts:
