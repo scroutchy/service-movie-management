@@ -1,5 +1,6 @@
 # Use an official Java runtime as a parent image
-FROM amazoncorretto:17-alpine
+#FROM amazoncorretto:17-alpine
+FROM openjdk:17.0.2-jdk-slim
 
 # Set the working directory
 WORKDIR /app
