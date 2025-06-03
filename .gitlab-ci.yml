@@ -175,4 +175,8 @@ trivy_scan_vulnerabilities:
 
 include:
   - template: Jobs/Container-Scanning.gitlab-ci.yml
+container_scanning:
+  variables:
+    CS_IMAGE: "$REGISTRY/$IMAGE_NAME:${CI_COMMIT_REF_SLUG}"
+
 
