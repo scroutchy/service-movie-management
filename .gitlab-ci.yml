@@ -34,7 +34,7 @@ variables:
 
 stages:          # List of stages for jobs, and their order of execution
   #  - build
-  - test
+  #  - test
   #  - sonar
   #  - publish
   - dependency_scan
@@ -176,6 +176,7 @@ trivy_scan_vulnerabilities:
 include:
   - template: Jobs/Container-Scanning.gitlab-ci.yml
 container_scanning:
+  stage: dependency_scan
   variables:
     CS_IMAGE: "$REGISTRY/$IMAGE_NAME:${CI_COMMIT_REF_SLUG}"
 
