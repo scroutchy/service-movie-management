@@ -111,7 +111,7 @@ trivy_scan_vulnerabilities:
   stage: dependency_scan
   variables:
     IMAGE_FULL: "$REGISTRY/$IMAGE_NAME:${CI_COMMIT_REF_SLUG}"
-    REPORT_FILE: report.sarif
+    REPORT_FILE: gl-dependency-scanning-report.json #report.sarif
     TRIVY_VERSION: 0.63.0
   image:
     name: aquasec/trivy:$TRIVY_VERSION
@@ -128,7 +128,7 @@ trivy_scan_vulnerabilities:
     - ls -lah .
   artifacts:
     reports:
-      dependency_scanning: gl-dependency-scanning-report.json
+      dependency_scanning: $REPORT_FILE
     paths:
       - $REPORT_FILE
     expire_in: 7 days
