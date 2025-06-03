@@ -34,7 +34,7 @@ variables:
 
 stages:          # List of stages for jobs, and their order of execution
   #  - build
-  #  - test
+  - test
   #  - sonar
   #  - publish
   - dependency_scan
@@ -166,3 +166,8 @@ trivy_scan_vulnerabilities:
 #  variables:
 #    KUBECONFIG_CLUSTER: "$KUBECONFIG_CONTENT"
 #    CLUSTER_VALUES_FILE: "./ops/springboot-app/values-minikube.yaml"
+
+sast:
+  stage: test
+include:
+  - template: Security/SAST.gitlab-ci.yml
