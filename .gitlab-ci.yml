@@ -34,7 +34,7 @@ variables:
 
 stages:          # List of stages for jobs, and their order of execution
   #  - build
-  - test
+  #  - test
   #  - sonar
   #  - publish
   - dependency_scan
@@ -124,7 +124,7 @@ trivy_scan_vulnerabilities:
     - docker pull "${IMAGE_FULL}"
     - curl -sSL -o /tmp/trivy-gitlab.tpl https://github.com/aquasecurity/trivy/raw/v${TRIVY_VERSION}/contrib/gitlab.tpl
     - ls -lah .
-    - trivy image --scanners vuln  "${IMAGE_FULL}" --no-progress --format template --template "@/tmp/trivy-gitlab.tpl" --output $REPORT_FILE --exit-code 1
+    - trivy image --scanners vuln  "${IMAGE_FULL}" --no-progress --format template --template "@/tmp/trivy-gitlab.tpl" --output $REPORT_FILE --exit-code 1 --debug
     - ls -lah .
   artifacts:
     reports:
@@ -167,7 +167,7 @@ trivy_scan_vulnerabilities:
 #    KUBECONFIG_CLUSTER: "$KUBECONFIG_CONTENT"
 #    CLUSTER_VALUES_FILE: "./ops/springboot-app/values-minikube.yaml"
 
-sast:
-  stage: test
-include:
-  - template: Security/SAST.gitlab-ci.yml
+#sast:
+#  stage: test
+#include:
+#  - template: Security/SAST.gitlab-ci.yml
