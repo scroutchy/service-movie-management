@@ -112,7 +112,7 @@ trivy_scan_vulnerabilities:
   variables:
     IMAGE_FULL: "$REGISTRY/$IMAGE_NAME:${CI_COMMIT_REF_SLUG}"
     REPORT_FILE: gl-container-scanning-report.json #report.sarif
-    TRIVY_VERSION: 0.63.0
+    TRIVY_VERSION: 0.62.1
   image:
     name: aquasec/trivy:$TRIVY_VERSION
     entrypoint: [ "" ]
