@@ -34,7 +34,7 @@ variables:
 
 stages:          # List of stages for jobs, and their order of execution
   #  - build
-  #  - test
+  - test
   #  - sonar
   #  - publish
   - dependency_scan
