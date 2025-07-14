@@ -2,13 +2,11 @@ package com.scr.project.smm.domains.movie.service
 
 import com.scr.project.smm.domains.movie.error.MovieErrors.OnMovieNotFound
 import com.scr.project.smm.domains.movie.messaging.v1.RewardedMessagingV1
-import com.scr.project.smm.domains.movie.model.business.Actor
+import com.scr.project.smm.domains.movie.model.business.MovieWithActors
 import com.scr.project.smm.domains.movie.model.entity.Movie
 import com.scr.project.smm.domains.movie.ports.MoviePort
-import com.scr.project.smm.domains.movie.ports.MovieWithActors
 import com.scr.project.smm.domains.movie.repository.MovieRepository
 import com.scr.project.smm.domains.movie.repository.SimpleMovieRepository
-import com.scr.project.smm.domains.security.service.KeycloakService
 import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -18,17 +16,15 @@ import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
-import reactor.kotlin.core.publisher.toFlux
 import java.time.LocalDate
 
 @Service
 class MovieService(
     private val simpleMovieRepository: SimpleMovieRepository,
     private val movieRepository: MovieRepository,
-    private val actorService: ActorService,
     private val synopsisService: SynopsisService,
-    private val keycloakService: KeycloakService,
     private val movieMessagingV1: RewardedMessagingV1,
+    private val movieEnricher: MovieEnricher
 ) : MoviePort {
 
     private val logger: Logger = LoggerFactory.getLogger(MovieService::class.java)
@@ -48,7 +44,7 @@ class MovieService(
         return simpleMovieRepository.findById(id.toHexString())
             .doOnSubscribe { logger.debug("Finding movie") }
             .switchIfEmpty { Mono.error(OnMovieNotFound(id)) }
-            .flatMap { m -> findActors(m.actors).collectList().map { MovieWithActors(m, it) } }
+            .flatMap { movieEnricher.enrichWithActors(it) }
             .doOnSuccess { logger.debug("Finding movie with id ${it.movie.id} was successful.") }
             .doOnError { logger.warn("Error when finding movie with id $id") }
     }
@@ -59,10 +55,4 @@ class MovieService(
             .doOnComplete { logger.debug("Listing movies was successful.") }
             .doOnError { logger.warn("Error when listing movies") }
     }
-
-    private fun findActors(actorIds: List<String>): Flux<Actor> {
-        return actorIds.toFlux().concatMap { keycloakService.getToken().map(::toBearerToken).flatMap { t -> actorService.findById(it, t) } }
-    }
-
-    private fun toBearerToken(token: String) = "Bearer $token"
 }

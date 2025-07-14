@@ -1,7 +1,7 @@
 package com.scr.project.smm.entrypoint.mapper
 
+import com.scr.project.smm.domains.movie.model.business.MovieWithActors
 import com.scr.project.smm.domains.movie.model.entity.Movie
-import com.scr.project.smm.domains.movie.ports.MovieWithActors
 import com.scr.project.smm.entrypoint.model.api.MovieApiDto
 
 fun MovieApiDto.toEntity() = Movie(title, releaseDate, type, "", actorIds)

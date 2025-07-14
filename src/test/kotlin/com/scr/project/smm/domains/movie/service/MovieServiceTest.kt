@@ -3,11 +3,11 @@ package com.scr.project.smm.domains.movie.service
 import com.scr.project.smm.domains.movie.error.MovieErrors.OnMovieNotFound
 import com.scr.project.smm.domains.movie.messaging.v1.RewardedMessagingV1
 import com.scr.project.smm.domains.movie.model.business.Actor
+import com.scr.project.smm.domains.movie.model.business.MovieWithActors
 import com.scr.project.smm.domains.movie.model.entity.Movie
 import com.scr.project.smm.domains.movie.model.entity.MovieType.Fantasy
 import com.scr.project.smm.domains.movie.repository.MovieRepository
 import com.scr.project.smm.domains.movie.repository.SimpleMovieRepository
-import com.scr.project.smm.domains.security.service.KeycloakService
 import io.mockk.clearMocks
 import io.mockk.confirmVerified
 import io.mockk.every
@@ -32,16 +32,15 @@ class MovieServiceTest {
     private val anotherMovie = Movie("another title", LocalDate.now().minusYears(5), Fantasy, "This is the synopsis", id = ObjectId.get())
     private val simpleMovieRepository = mockk<SimpleMovieRepository>()
     private val movieRepository = mockk<MovieRepository>()
-    private val actorService = mockk<ActorService>()
     private val synopsisService = mockk<SynopsisService>()
-    private val keycloakService = mockk<KeycloakService>()
     private val movieMessagingV1 = mockk<RewardedMessagingV1>()
+    private val movieEnricher = mockk<MovieEnricher>()
     private val movieService =
-        MovieService(simpleMovieRepository, movieRepository, actorService, synopsisService, keycloakService, movieMessagingV1)
+        MovieService(simpleMovieRepository, movieRepository, synopsisService, movieMessagingV1, movieEnricher)
 
     @BeforeEach
     internal fun setUp() {
-        clearMocks(simpleMovieRepository, movieRepository, actorService, synopsisService, movieMessagingV1)
+        clearMocks(simpleMovieRepository, movieRepository, synopsisService, movieMessagingV1, movieEnricher)
     }
 
     @Test
@@ -68,6 +67,7 @@ class MovieServiceTest {
     @Test
     fun `findById should succeed when movie exists`() {
         every { simpleMovieRepository.findById(movie.id!!.toHexString()) } answers { movie.toMono() }
+        every { movieEnricher.enrichWithActors(movie) } answers { MovieWithActors(movie, emptyList()).toMono() }
         movieService.findById(movie.id!!)
             .test()
             .expectSubscription()
@@ -80,15 +80,16 @@ class MovieServiceTest {
                 assertThat(it.actors).isEmpty()
             }.verifyComplete()
         verify(exactly = 1) { simpleMovieRepository.findById(movie.id!!.toHexString()) }
-        confirmVerified(simpleMovieRepository)
+        verify(exactly = 1) { movieEnricher.enrichWithActors(movie) }
+        confirmVerified(simpleMovieRepository, movieEnricher)
     }
 
     @Test
     fun `findById should succeed and retrieve actors when provided in movie`() {
         val actorId = ObjectId.get().toHexString()
         every { simpleMovieRepository.findById(movie.id!!.toHexString()) } answers { movie.copy(actors = listOf(actorId)).toMono() }
-        every { actorService.findById(actorId, any()) } answers { Actor(actorId, "Brad Pitt").toMono() }
-        every { keycloakService.getToken() } answers { "token".toMono() }
+        every { movieEnricher.enrichWithActors(movie.copy(actors = listOf(actorId))) } answers
+                { MovieWithActors(movie, listOf(Actor(actorId, "Brad Pitt"))).toMono() }
         movieService.findById(movie.id!!)
             .test()
             .expectSubscription()
@@ -102,8 +103,8 @@ class MovieServiceTest {
                 assertThat(it.actors.single()).isEqualTo(Actor(actorId, "Brad Pitt"))
             }.verifyComplete()
         verify(exactly = 1) { simpleMovieRepository.findById(movie.id!!.toHexString()) }
-        verify(exactly = 1) { actorService.findById(any(), "Bearer token") }
-        confirmVerified(simpleMovieRepository, actorService)
+        verify(exactly = 1) { movieEnricher.enrichWithActors(movie.copy(actors = listOf(actorId))) }
+        confirmVerified(simpleMovieRepository, movieEnricher)
     }
 
     @Test

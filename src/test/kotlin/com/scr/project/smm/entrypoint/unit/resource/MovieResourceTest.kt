@@ -2,10 +2,10 @@ package com.scr.project.smm.entrypoint.unit.resource
 
 import com.scr.project.smm.domains.movie.error.MovieErrors.OnMovieNotFound
 import com.scr.project.smm.domains.movie.model.business.Actor
+import com.scr.project.smm.domains.movie.model.business.MovieWithActors
 import com.scr.project.smm.domains.movie.model.entity.Movie
 import com.scr.project.smm.domains.movie.model.entity.MovieType.Fantasy
 import com.scr.project.smm.domains.movie.model.entity.MovieType.Western
-import com.scr.project.smm.domains.movie.ports.MovieWithActors
 import com.scr.project.smm.domains.movie.service.MovieService
 import com.scr.project.smm.entrypoint.mapper.toEntity
 import com.scr.project.smm.entrypoint.model.api.ActorApiDto
