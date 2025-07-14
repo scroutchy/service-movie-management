@@ -26,6 +26,9 @@ class KeycloakService(
                 add("grant_type", "client_credentials")
             })
             .retrieve()
+            .onStatus({ it.isError }) {
+                it.bodyToMono(String::class.java).map { b -> RuntimeException("Keycloak error: ${it.statusCode()} - $b") }
+            }
             .bodyToMono(Map::class.java)
             .map { response -> response["access_token"] as String }
             .cache()

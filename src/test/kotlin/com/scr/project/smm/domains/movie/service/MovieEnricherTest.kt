@@ -61,4 +61,22 @@ class MovieEnricherTest {
         verify(exactly = 1) { keycloakService.getToken() }
         confirmVerified(actorService, keycloakService)
     }
+
+    @Test
+    fun `enrichWithActors should handle errors from keycloak`() {
+        val actorIds = listOf("actor1", "actor2")
+        val movie = Movie("Inception", LocalDate.of(2010, 7, 16), Thriller, "A mind-bending thriller", actorIds)
+        every { actorService.findById(any(), any()) } answers { Actor(firstArg(), "Leonardo DiCaprio").toMono() }
+        every { keycloakService.getToken() } answers { RuntimeException("Keycloak error").toMono() }
+        movieEnricher.enrichWithActors(movie)
+            .test()
+            .expectSubscription()
+            .consumeErrorWith {
+                assertThat(it).isInstanceOf(RuntimeException::class.java)
+                assertThat(it.message).contains("Keycloak error")
+            }.verify()
+        verify(exactly = 1) { keycloakService.getToken() }
+        verify(inverse = true) { actorService.findById(any(), any()) }
+        confirmVerified(actorService, keycloakService)
+    }
 }
