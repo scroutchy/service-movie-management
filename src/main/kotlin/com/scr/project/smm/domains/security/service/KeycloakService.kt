@@ -1,5 +1,6 @@
 package com.scr.project.smm.domains.security.service
 
+import com.scr.project.smm.domains.security.error.KeycloakErrors.OnKeycloakError
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.stereotype.Service
@@ -27,7 +28,7 @@ class KeycloakService(
             })
             .retrieve()
             .onStatus({ it.isError }) {
-                it.bodyToMono(String::class.java).map { b -> RuntimeException("Keycloak error: ${it.statusCode()} - $b") }
+                it.bodyToMono(String::class.java).map { b -> OnKeycloakError("Keycloak error: ${it.statusCode()} - $b") }
             }
             .bodyToMono(Map::class.java)
             .map { response -> response["access_token"] as String }

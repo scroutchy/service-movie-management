@@ -3,6 +3,7 @@ package com.scr.project.smm.domains.movie.service
 import com.scr.project.smm.domains.movie.model.business.Actor
 import com.scr.project.smm.domains.movie.model.entity.Movie
 import com.scr.project.smm.domains.movie.model.entity.MovieType.Thriller
+import com.scr.project.smm.domains.security.error.KeycloakErrors.OnKeycloakError
 import com.scr.project.smm.domains.security.service.KeycloakService
 import io.mockk.clearMocks
 import io.mockk.confirmVerified
@@ -67,12 +68,12 @@ class MovieEnricherTest {
         val actorIds = listOf("actor1", "actor2")
         val movie = Movie("Inception", LocalDate.of(2010, 7, 16), Thriller, "A mind-bending thriller", actorIds)
         every { actorService.findById(any(), any()) } answers { Actor(firstArg(), "Leonardo DiCaprio").toMono() }
-        every { keycloakService.getToken() } answers { RuntimeException("Keycloak error").toMono() }
+        every { keycloakService.getToken() } answers { OnKeycloakError("Keycloak error").toMono() }
         movieEnricher.enrichWithActors(movie)
             .test()
             .expectSubscription()
             .consumeErrorWith {
-                assertThat(it).isInstanceOf(RuntimeException::class.java)
+                assertThat(it).isInstanceOf(OnKeycloakError::class.java)
                 assertThat(it.message).contains("Keycloak error")
             }.verify()
         verify(exactly = 1) { keycloakService.getToken() }

@@ -1,4 +1,6 @@
-import com.scr.project.smm.domains.security.service.KeycloakService
+package com.scr.project.smm.domains.security.service
+
+import com.scr.project.smm.domains.security.error.KeycloakErrors.OnKeycloakError
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
@@ -57,7 +59,7 @@ class KeycloakServiceTest {
         every { requestBodyUriSpec.bodyValue(any()) } returns requestHeadersSpec
         every { requestHeadersSpec.retrieve() } returns responseSpec
         every { responseSpec.onStatus(any(), any()) } returns responseSpec
-        every { responseSpec.bodyToMono(Map::class.java) } returns Mono.error(RuntimeException("Keycloak error: 401 - Unauthorized"))
+        every { responseSpec.bodyToMono(Map::class.java) } returns Mono.error(OnKeycloakError("Keycloak error: 401 - Unauthorized"))
 
         service.getToken()
             .test()
