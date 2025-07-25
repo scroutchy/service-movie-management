@@ -37,7 +37,7 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom("org.springframework.cloud:spring-cloud-dependencies:2024.0.0")
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:2025.0.0")
     }
 }
 
@@ -67,6 +67,7 @@ dependencies {
     implementation("com.jakewharton.retrofit:retrofit2-reactor-adapter:$reactorAdapterVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("io.confluent:kafka-avro-serializer:7.9.0")
+    implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-reactor-resilience4j")
     add("avroSchemas", "org.scr.project:service-rewarded-management:0.1.1:schemas")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")

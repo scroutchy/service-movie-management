@@ -30,3 +30,15 @@ keycloak:
   realm: cinema
   client-id: client-internal-app
   client-secret: ${KEYCLOAK_CLIENT_SECRET}
+resilience4j:
+  circuitbreaker:
+    instances:
+      actor-service:
+        register-health-indicator: true
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        permitted-number-of-calls-in-half-open-state: 3
+        wait-duration-in-open-state: 10s
+        failure-rate-threshold: 50
+        event-consumer-buffer-size: 10
+        automatic-transition-from-open-to-half-open-enabled: true
