@@ -146,6 +146,8 @@ internal class MovieResourceIntegrationTest(
                     assertThat(title).isEqualTo(body.title)
                     assertThat(releaseDate).isEqualTo(body.releaseDate)
                     assertThat(type).isEqualTo(body.type)
+                    assertThat(createdAt).isNotNull
+                    assertThat(lastModifiedAt).isNotNull
                 }
                 awaitUntil {
                     val messages = kafkaRewardedConsumer.poll()

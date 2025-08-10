@@ -1,5 +1,6 @@
 package com.scr.project.smm.domains.movie.model.entity
 
+import com.scr.project.commons.cinema.model.entity.Auditable
 import org.bson.codecs.pojo.annotations.BsonId
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
@@ -14,4 +15,4 @@ data class Movie(
     val synopsis: String,
     val actors: List<String> = listOf(),
     @field:Id @BsonId var id: ObjectId? = null,
-)
+) : Auditable()

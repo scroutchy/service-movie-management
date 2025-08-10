@@ -38,6 +38,8 @@ internal class SimpleMovieRepositoryTest(
                 assertThat(it.releaseDate).isEqualTo(movie.releaseDate)
                 assertThat(it.type).isEqualTo(movie.type)
                 assertThat(it.synopsis).isEqualTo(movie.synopsis)
+                assertThat(it.createdAt).isNotNull
+                assertThat(it.lastModifiedAt).isNotNull
                 assertThat(movieDao.count()).isEqualTo(initialCount + 1)
             }
             .verifyComplete()

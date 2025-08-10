@@ -15,7 +15,7 @@ import org.springframework.transaction.reactive.TransactionalOperator
 @Configuration(proxyBeanMethods = false)
 @EnableReactiveMongoRepositories(basePackages = ["com.scr.project"])
 @EnableTransactionManagement
-class MongoCoreConfiguration {
+class MovieMongoCoreConfiguration {
 
     @Bean
     fun customConversions() = MongoCustomConversions(
