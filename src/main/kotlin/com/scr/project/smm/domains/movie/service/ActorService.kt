@@ -1,6 +1,7 @@
 package com.scr.project.smm.domains.movie.service
 
 import com.scr.project.smm.domains.movie.client.ActorClient
+import com.scr.project.smm.domains.movie.error.MovieErrors
 import com.scr.project.smm.domains.movie.error.MovieErrors.OnActorNotFound
 import com.scr.project.smm.domains.movie.model.business.Actor
 import com.scr.project.smm.entrypoint.mapper.toActor
@@ -8,18 +9,20 @@ import com.scr.project.smm.entrypoint.model.api.retrofit.ActorClientApiDto
 import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreaker
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.core.publisher.Mono
 
 @Service
-class ActorService(private val actorClient: ActorClient) {
+class ActorService(private val actorClient: ActorClient, private val circuitBreaker: ReactiveCircuitBreaker) {
 
     private val logger: Logger = LoggerFactory.getLogger(ActorService::class.java)
 
     fun findById(id: String, token: String): Mono<Actor> {
-        return actorClient.findById(ObjectId(id), token)
+        return circuitBreaker.run(
+            Mono.defer { actorClient.findById(ObjectId(id), token) }
             .doOnSubscribe { logger.debug("Retrieving actor data for actor $id") }
             .doOnNext { logger.debug("Retrieved actor data for actor $id") }
             .onErrorMap {
@@ -30,6 +33,11 @@ class ActorService(private val actorClient: ActorClient) {
                     it
                 }
             }
-            .map(ActorClientApiDto::toActor)
+                .map(ActorClientApiDto::toActor),
+            { throwable ->
+                logger.warn("Actor service is unavailable, fallback triggered for actor $id.", throwable)
+                Mono.error(MovieErrors.OnActorServiceUnavailable())
+            }
+        )
     }
 }
