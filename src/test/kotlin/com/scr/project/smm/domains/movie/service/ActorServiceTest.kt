@@ -14,6 +14,7 @@ import org.springframework.http.HttpHeaders.EMPTY
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.kotlin.core.publisher.toMono
 import reactor.kotlin.test.test
+import retrofit2.Response
 
 class ActorServiceTest {
 
@@ -24,7 +25,7 @@ class ActorServiceTest {
 
     @Test
     fun `findById should succeed`() {
-        every { actorClient.findById(ObjectId(actor.id), token) } answers { actor.toMono() }
+        every { actorClient.findById(ObjectId(actor.id), token) } answers { Response.success(actor).toMono() }
         actorService.findById(actor.id, token)
             .test()
             .expectSubscription()

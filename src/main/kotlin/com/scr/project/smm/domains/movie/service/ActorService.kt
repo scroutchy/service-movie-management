@@ -4,7 +4,6 @@ import com.scr.project.smm.domains.movie.client.ActorClient
 import com.scr.project.smm.domains.movie.error.MovieErrors.OnActorNotFound
 import com.scr.project.smm.domains.movie.model.business.Actor
 import com.scr.project.smm.entrypoint.mapper.toActor
-import com.scr.project.smm.entrypoint.model.api.retrofit.ActorClientApiDto
 import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -30,6 +29,7 @@ class ActorService(private val actorClient: ActorClient) {
                     it
                 }
             }
-            .map(ActorClientApiDto::toActor)
+            .map { it.body() }
+            .map { it?.toActor() }
     }
 }
